@@ -36,25 +36,24 @@ def apply_music_gain(noise, audio):
     data_rms = find_RMS_data(audio)
     data_rms_arr = np.hstack(list(data_rms.values()))
 
-    current_rms_ratio = data_rms_arr/noise_rms_arr
+    current_rms_ratio = noise_rms_arr/data_rms_arr
 
     length_seg = int(len(current_rms_ratio)/len(user_inputs.sought_ratio))
     master_c = 0
     index = 0 
-    combined_ratio_dict = {}
+    new_ratio_dict = {}
     for i in range(0,len(current_rms_ratio), length_seg):
         factor=user_inputs.sought_ratio[master_c]
         chunk = current_rms_ratio[i:i+length_seg]
-        modified_chunk = [x *factor for x in chunk]
+        modified_chunk = [factor/x for x in chunk]
         for value in modified_chunk:
-            combined_ratio_dict[index]=value
+            new_ratio_dict[index]=value
             index+=1
         master_c+=1
 
     modified_music = {}
     for key, value in audio.items():
-        modified_music[key] = combined_ratio_dict[key] * audio[key]
-
+        modified_music[key] = audio[key]/ new_ratio_dict[key] 
     return modified_music
 
 

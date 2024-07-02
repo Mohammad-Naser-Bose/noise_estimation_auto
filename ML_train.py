@@ -222,7 +222,7 @@ def plotting_performance(loss_values,title):
     plt.ylabel("Loss")
     plt.title(title)
     #plt.show()
-    plt.savefig("Training error_per_Epoch.png")
+    plt.savefig("Training error_per_epoch.png")
 def plotting_results_general_training(error,predictions,gt,printing_label):
     error_ready = [element for array in error for element in array.tolist()]
     # plt.figure(figsize=(10,5))
@@ -274,9 +274,10 @@ def run_ML(train_inputs,train_labels):
             optimizer.step()
             running_train_loss += loss_value.item()
 
-            print("real:", targets.detach().cpu().numpy().flatten())
-            print("pred:", outputs.detach().cpu().numpy().flatten())
-            print("-------")
+            # print("real:", targets.detach().cpu().numpy().flatten())
+            # print("pred:", outputs.detach().cpu().numpy().flatten())
+            # print("-------")
+            
 
             
 
@@ -287,7 +288,7 @@ def run_ML(train_inputs,train_labels):
 
                 predictions.append(predicted_values)
                 gt.append(ground_truth_values)
-
+        print("loss is:", loss_value)
         
 
         avg_train_loss = running_train_loss / num_train_batches
@@ -326,4 +327,5 @@ if __name__ == "__main__":
 
     #### save model
 
-    ####### TRY SMAE STANDARIZATION
+    #### things different from previous: the way the gain is applied, the noise feature is different, and only one window of each noise file was considered.
+    ####### TRY SAME STANDARIZATION (MIN-MAX), AND [-1 1] NOT [0 1]
