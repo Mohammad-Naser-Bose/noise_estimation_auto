@@ -4,7 +4,7 @@ recordings_dir = r"audio_files_short"
 noise_dir = r"noise_files"
 window_size_sec = 4  # in [s]
 sampling_freq = 44100  # in [Hz]  
-num_epochs=100
+num_epochs=2
 train_ratio = .9
 val_ratio = .05
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344
