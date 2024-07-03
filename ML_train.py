@@ -269,14 +269,14 @@ def run_ML(train_inputs,train_labels):
             inputs = inputs.to(torch.float32)
             outputs = model(inputs.squeeze(1))
 
-            loss_value = reg_criterion(outputs, targets.unsqueeze(1))
+            loss_value  = reg_criterion(outputs, targets)
             loss_value.backward()
             optimizer.step()
             running_train_loss += loss_value.item()
 
-            # print("real:", targets.detach().cpu().numpy().flatten())
-            # print("pred:", outputs.detach().cpu().numpy().flatten())
-            # print("-------")
+            print("real:", targets.detach().cpu().numpy().flatten())
+            print("pred:", outputs.detach().cpu().numpy().flatten())
+            print("-------")
             
 
             
