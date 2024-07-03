@@ -10,7 +10,6 @@ from sklearn.model_selection import train_test_split
 import random
 from torch.utils.data import DataLoader, TensorDataset, Dataset
 import IPython.display as ipd
-import sounddevice as sd
 import scipy.signal as signal
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import math
