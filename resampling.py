@@ -11,5 +11,4 @@ def resampling(orig_data,label):
 
 
 Data_B = resampling(loading_data.Data_A,"noise")
-print(Data_B[0])
 Data_E = resampling(loading_data.Data_D,"music")

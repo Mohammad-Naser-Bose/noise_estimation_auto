@@ -24,4 +24,5 @@ def loading_data(dir,label):
 
 
 Data_A = loading_data(user_inputs.noise_dir,"noise")
+print(Data_A[0])
 Data_D = loading_data(user_inputs.recordings_dir,"music")
