@@ -1,7 +1,7 @@
 from imports import *
 
-recordings_dir = r"C:\Users\mn1059928\OneDrive - Bose Corporation\Desktop\audio_files_short"
-noise_dir = r"C:\Users\mn1059928\OneDrive - Bose Corporation\Desktop\noise_files"
+recordings_dir = r"audio_files_short"
+noise_dir = r"noise_files"
 window_size_sec = 4  # in [s]
 sampling_freq = 44100  # in [Hz]  
 num_epochs=100
