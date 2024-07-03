@@ -14,10 +14,10 @@ filter_num_coeff = [1]
 filter_dem_coeff = [1, 1]
 normalization_flag = True
 noise_gains = [0] # dB
-sought_ratio = [2, 5, 10]     # Linear  (noise RMS to music RMS)   # to determine the audio gains 
+sought_ratio = [5]     # Linear  (noise RMS to music RMS)   # to determine the audio gains 
 ML_type = "CNN"
 norm_feature =True
-num_noise_files = 27
+num_noise_files = 3
 num_music_files = 3
 
 
