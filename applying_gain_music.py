@@ -13,7 +13,7 @@ def find_RMS_noise(data):
     for i, recording in enumerate (data.items()):
         my_data = recording[1]
         RMS_values.append(librosa.feature.rms(y=np.array(my_data)).mean())
-        RMS_values_avg = np.mean(RMS_values)
+    RMS_values_avg = np.mean(RMS_values)
     return RMS_values_avg
 
 def find_RMS_data(data):
@@ -21,35 +21,28 @@ def find_RMS_data(data):
     for i, recording in enumerate (data.items()):
         my_data = recording[1]
         RMS_values.append(librosa.feature.rms(y=np.array(my_data)).mean())
-        RMS_values_avg = np.mean(RMS_values)
-    return RMS_values_avg
+    RMS_values =RMS_values
+    return RMS_values
 
 
 def apply_music_gain(noise, audio_full, audio_short):
     noise_rms_avg = find_RMS_noise(noise)
-    data_rms_avg = find_RMS_data(audio_short)
+    data_rms = find_RMS_data(audio_short)
 
-    current_rms_ratio = noise_rms_avg/data_rms_avg
+    current_rms_ratio = noise_rms_avg/data_rms
 
     modified_factors = []
     for val in user_inputs.sought_ratio:
         modified_factors.append(current_rms_ratio * val)
 
-    length_seg = int(len(audio_full)/len(user_inputs.sought_ratio))
-    modified_factors_dict = {}
-    i=0
-    beg_index = i
+    modified_factors_list = []
     for mod_f in modified_factors:
-        end_index = i+length_seg
-        for index in range(beg_index, end_index):
-            modified_factors_dict[i] = mod_f
-            i+=1
-        beg_index=end_index
-
+        [modified_factors_list.append(val) for n in range(0, len(noise)) for val in mod_f]
+              
 
     modified_music = {}
     for key, value in audio_full.items():
-        modified_music[key] = audio_full[key]/ modified_factors_dict[key] 
+        modified_music[key] = audio_full[key]/ modified_factors_list[key]
     return modified_music
 
 

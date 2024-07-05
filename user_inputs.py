@@ -4,7 +4,7 @@ recordings_dir = r"audio_files_short"
 noise_dir = r"noise_files"
 window_size_sec = 4  # in [s]
 sampling_freq = 44100  # in [Hz]  
-num_epochs=150
+num_epochs=50
 train_ratio = .9
 val_ratio = .05
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344
@@ -17,7 +17,7 @@ noise_gains = [0] # dB
 sought_ratio = [5, 10]     # Linear  (noise RMS to music RMS)   # to determine the audio gains 
 ML_type = "CNN"
 norm_feature =True
-num_noise_files = 27
+num_noise_files = 11
 num_music_files = 3
 
 
