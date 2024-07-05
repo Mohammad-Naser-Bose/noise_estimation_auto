@@ -298,34 +298,30 @@ def run_ML(train_inputs,train_labels):
         #print(scheduler.get_last_lr())
 
     plotting_performance(train_loss_values,"Training")
-    plotting_results_general_training(error,predictions,gt,"Training")
 
-    return
-
+    return model
 
 
 
-if __name__ == "__main__":
-    window_len_sample_downsampled = user_inputs.window_len_sample_downsampled
-    ML_type = user_inputs.ML_type
-    batch_size = user_inputs.batch_size
-    num_epochs = user_inputs.num_epochs
-    if ML_type == "CNN":
-        my_ML_model = CNN()
-    elif ML_type == "NN":
-        my_ML_model = NN()
-    elif ML_type == "CNN_LSTM_a":
-        my_ML_model = CNN_LSTM_a()      
-    elif ML_type == "CNN_LSTM_b":
-        my_ML_model = CNN_LSTM_b()            
-    elif ML_type == "CNN_LSTM_c":
-        my_ML_model = CNN_LSTM_c()    
-    elif ML_type == "FC":
-        my_ML_model = FC()     
-    
-    model = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)
 
-    #### save model
+window_len_sample_downsampled = user_inputs.window_len_sample_downsampled
+ML_type = user_inputs.ML_type
+batch_size = user_inputs.batch_size
+num_epochs = user_inputs.num_epochs
+if ML_type == "CNN":
+    my_ML_model = CNN()
+elif ML_type == "NN":
+    my_ML_model = NN()
+elif ML_type == "CNN_LSTM_a":
+    my_ML_model = CNN_LSTM_a()      
+elif ML_type == "CNN_LSTM_b":
+    my_ML_model = CNN_LSTM_b()            
+elif ML_type == "CNN_LSTM_c":
+    my_ML_model = CNN_LSTM_c()    
+elif ML_type == "FC":
+    my_ML_model = FC()     
+
+model = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)
 
     #### things different from previous: the way the gain is applied, the noise feature is different, and only one window of each noise file was considered.
     ####### TRY SAME STANDARIZATION (MIN-MAX), AND [-1 1] NOT [0 1]

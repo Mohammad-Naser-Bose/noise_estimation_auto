@@ -1,10 +1,6 @@
 from imports import *
-import user_inputs
 import splitting_normalization
-
-
-
-
+import ML_train
 
 def ML_validating(model, val_inputs,val_labels):
     reg_criterion = nn.MSELoss()
@@ -65,9 +61,28 @@ def ML_testing(model, test_inputs, test_labels):
 
     printing_label = "Testing"
     plotting_results_general_other(errors_test,all_pred,all_gt,printing_label)
+def plotting_results_general_other(error,predictions,gt,printing_label):
+    error_ready = [element for array in error for element in array.tolist()]
+    # plt.figure(figsize=(10,5))
+    # plt.hist(error_ready,bins=30)
+    # plt.xlabel("Error [%]")
+    # plt.ylabel("Num of datapoints")
+    # #plt.title(title)
+    # #plt.show()
+    # plt.savefig(f"{printing_label} histogram performance.png")
 
+    real_ready = [value.item() for value in gt]
+    pred_ready = [value.item() for value in predictions]
+    plt.figure(figsize=(10,5))
+    plt.plot(real_ready,label="orig")
+    plt.plot(pred_ready,label="pred")
+    plt.legend()
+    plt.xlabel("datapoint")
+    plt.ylabel("Noise RMS")
+    #plt.title(title)
+    #plt.show()
+    plt.savefig(f"{printing_label} raw performance.png")
 
 ### import model
-
-ML_validating(model, splitting_normalization.data_val_xy, splitting_normalization.val_z_norm_l)
-ML_testing(model, splitting_normalization.data_test_xy, splitting_normalization.test_z_norm_l)
+ML_validating(ML_train.model, splitting_normalization.data_val_xy, splitting_normalization.val_z_norm_l)
+ML_testing(ML_train.model, splitting_normalization.data_test_xy, splitting_normalization.test_z_norm_l)
