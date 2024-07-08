@@ -41,35 +41,13 @@ class CNN(nn.Module):
         x = self.relu(self.fc4(x))
         x = self.fc5(x)
         return x
-class FC(nn.Module):
+class CNN_LSTM(nn.Module):
     def __init__(self):
-        super(FC, self).__init__()
-        self.fc1 = nn.Linear(13800,10240)
-        self.fc2 = nn.Linear(10240,7168)
-        self.fc3 = nn.Linear(7168,3072)
-        self.fc4 = nn.Linear(3072,1024)
-        self.fc5 = nn.Linear(1024,256)
-        self.fc6 = nn.Linear(256,64)
-        self.fc7 = nn.Linear(64,1)
-
-    def forward(self,x):
-        batch_size, dim1, dim2 = x.size()
-        x = x.view(batch_size,dim1 * dim2)
-        x = self.fc1(x)
-        x = self.fc2(x)
-        x = self.fc3(x)
-        x = self.fc4(x)
-        x = self.fc5(x)
-        x = self.fc6(x)
-        x = self.fc7(x)
-        
-        return x
-class CNN_LSTM_b(nn.Module):
-    def __init__(self):
-        super(CNN_LSTM_b, self).__init__()
+        super(CNN_LSTM, self).__init__()
         self.conv1 = nn.Conv1d(in_channels=2, out_channels=16, kernel_size=3, stride=3, padding=1, dilation=1)
         self.conv2 = nn.Conv1d(in_channels=16, out_channels=32, kernel_size=3, stride=3, padding=1, dilation=1)
         self.conv3 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3, stride=3, padding=1, dilation=1)
+        self.dropout1 = nn.Dropout(0.35)
         self.pool = nn.MaxPool1d(kernel_size=2, stride=2, padding=0)
         self.relu = nn.ReLU()
         self.flattened_size= self._get_flattened_size()
@@ -89,122 +67,25 @@ class CNN_LSTM_b(nn.Module):
         x = self.pool(self.relu(self.conv1(x)))
         x = self.pool(self.relu(self.conv2(x)))
         x = self.pool(self.relu(self.conv3(x)))
+        x = self.dropout1(x)
 
         x_dim = x.dim()
         if x_dim ==3:
             x=x.permute(0,2,1)
         elif x_dim ==2:
-            x=x.permute(2,1)
+            x=x.permute(1,0)
 
         x,_ = self.lstm(x)
-
-        x = self.relu(self.fc1(x.flatten()))
+        #x = self.dropout1(x)
+        if x_dim ==3:
+            vvv=x.size(0)
+            x_reshaped = x.reshape(vvv,-1)
+        elif x_dim ==2:
+            x_reshaped=x.flatten()
+        #x_reshaped = self.dropout1(x_reshaped)
+        x = self.relu(self.fc1(x_reshaped))
         x = self.relu(self.fc2(x))
         x = self.fc3(x)
-        return x
-class CNN_LSTM_a(nn.Module):
-    def __init__(self):
-        super(CNN_LSTM_a, self).__init__()
-        self.conv1 = nn.Conv1d(in_channels=2, out_channels=16, kernel_size=5, stride=5, padding=1, dilation=1)
-        self.pool = nn.MaxPool1d(kernel_size=2, stride=2, padding=0)
-        self.relu = nn.ReLU(negative_slope=0.01)
-        self.flattened_size= self._get_flattened_size()
-        self.fc1 = nn.Linear(self.flattened_size,4096)
-        self.lstm = nn.LSTM(input_size=4096, hidden_size=4096, num_layers=2)
-        self.fc2= nn.Linear(4096,1024)
-        self.fc3= nn.Linear(1024,128)
-        self.fc4= nn.Linear(128,1)
-        
-    def _get_flattened_size(self):
-        x = torch.zeros(1,2,window_len_sample_downsampled) # one sample regardless the batch size, num channels, num timepoints
-        x = self.pool(self.relu(self.conv1(x)))
-        return x.numel()
-
-    def forward(self,x):
-        x = self.pool(self.relu(self.conv1(x)))
-        x_dim = x.dim()
-        if x_dim==3:
-            x=x.view(x.size(0), -1)
-        else:
-            x=x.view(-1)
-
-        x = self.relu(self.fc1(x))
-        x,_ = self.lstm(x)
-        x = self.relu(self.fc2(x))
-        x = self.relu(self.fc3(x))
-        x = self.fc4(x)
-        return x
-class CNN_LSTM_c(nn.Module):
-    def __init__(self):
-        super(CNN_LSTM_c, self).__init__()
-        self.lstm = nn.LSTM(input_size=2, hidden_size=64, num_layers=2, batch_first=True)
-
-        self.conv1 = nn.Conv1d(in_channels=64, out_channels=1, kernel_size=3, stride=3, padding=1, dilation=1)        
-        self.pool = nn.MaxPool1d(kernel_size=2, stride=2, padding=0)
-        self.relu = nn.ReLU()
-        #self.flattened_size= self._get_flattened_size()
-        self.fc1= nn.Linear(460,64)
-        self.fc2= nn.Linear(64,1)
-        
-    # def _get_flattened_size(self):
-    #     x = torch.zeros(1,2,2) # one sample regardless the batch size, num channels, num timepoints
-    #     x,_  = self.lstm(x)
-    #     x = self.pool(self.relu(self.conv1(x)))
-    #     return x.numel()
-
-    def forward(self,x):
-        x_dim = x.dim()
-        if x_dim==3:
-            x_reshaped = x.permute(0,2,1)
-            x,_  = self.lstm(x_reshaped)
-            x_reshaped_2= x.permute(0,2,1)
-        else:
-            x,_  = self.lstm(x.permute(1,0))
-            x_reshaped_2= x.permute(1,0)
-        
-        x = self.pool(self.relu(self.conv1(x_reshaped_2)))   
-
-        x = self.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
-class NN(nn.Module):
-    def __init__(self):
-        super(NN, self).__init__()
-        self.relu = nn.ReLU(negative_slope=0.01)
-        self.fc1 = nn.Linear(74304,4096)
-        self.fc2 = nn.Linear(4096,2048)
-        self.fc3 = nn.Linear(2048,1024)
-        self.fc4 = nn.Linear(1024,512)
-        self.fc5= nn.Linear(512,256)
-        self.fc6= nn.Linear(256,128)
-        self.fc7= nn.Linear(128,64)
-        self.fc8= nn.Linear(64,32)
-        self.fc9= nn.Linear(32,16)
-        self.fc10= nn.Linear(16,8)
-        self.fc11= nn.Linear(8,4)
-        self.fc12= nn.Linear(4,2)
-        self.fc13= nn.Linear(2, 1)
-        
-    def forward(self,x):
-        x_dim = x.dim()
-        if x_dim==3:
-            x=x.view(x.size(0), -1)
-        else:
-            x=x.view(-1)
-
-        x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))
-        x = self.relu(self.fc3(x))
-        x = self.relu(self.fc4(x))
-        x = self.relu(self.fc5(x))
-        x = self.relu(self.fc6(x))
-        x = self.relu(self.fc7(x))
-        x = self.relu(self.fc8(x))
-        x = self.relu(self.fc9(x))
-        x = self.relu(self.fc10(x))
-        x = self.relu(self.fc11(x))
-        x = self.relu(self.fc12(x))
-        x = self.fc13(x)
         return x
 class CustomDataset(Dataset):
     def __init__(self,inputs,labels):
@@ -283,9 +164,6 @@ def run_ML(train_inputs,train_labels):
             print("pred:", outputs.detach().cpu().numpy().flatten())
             print("-------")
             
-
-            
-
             if epoch == num_epochs-1:
                 ground_truth_values = targets.detach().cpu().numpy().flatten()
                 predicted_values = outputs.detach().cpu().numpy().flatten()
@@ -328,15 +206,7 @@ batch_size = user_inputs.batch_size
 num_epochs = user_inputs.num_epochs
 if ML_type == "CNN":
     my_ML_model = CNN()
-elif ML_type == "NN":
-    my_ML_model = NN()
-elif ML_type == "CNN_LSTM_a":
-    my_ML_model = CNN_LSTM_a()      
-elif ML_type == "CNN_LSTM_b":
-    my_ML_model = CNN_LSTM_b()            
-elif ML_type == "CNN_LSTM_c":
-    my_ML_model = CNN_LSTM_c()    
-elif ML_type == "FC":
-    my_ML_model = FC()     
+elif ML_type == "CNN_LSTM":
+    my_ML_model = CNN_LSTM()             
 
 model = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)

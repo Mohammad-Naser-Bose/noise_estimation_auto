@@ -63,13 +63,16 @@ def ML_testing(model, test_inputs, test_labels):
     plotting_results_general_other(errors_test,all_pred,all_gt,printing_label)
 def plotting_results_general_other(error,predictions,gt,printing_label):
     error_ready = [element for array in error for element in array.tolist()]
-    # plt.figure(figsize=(10,5))
-    # plt.hist(error_ready,bins=30)
-    # plt.xlabel("Error [%]")
-    # plt.ylabel("Num of datapoints")
-    # #plt.title(title)
-    # #plt.show()
-    # plt.savefig(f"{printing_label} histogram performance.png")
+    plt.figure(figsize=(10,5))
+    capped_data = np.clip(error_ready,a_min=None, a_max=100)
+    bins=np.append(np.linspace(0,100,10),np.inf)
+    hist, bin_edges = np.histogram(capped_data,bins=bins)
+    plt.hist(capped_data,bins=bin_edges,edgecolor="black")
+    plt.xlabel("Error [%]")    
+    plt.ylabel("Num of datapoints")
+    #plt.title(title)
+    #plt.show()
+    plt.savefig(f"{printing_label} histogram performance.png")
 
     real_ready = [value.item() for value in gt]
     pred_ready = [value.item() for value in predictions]
