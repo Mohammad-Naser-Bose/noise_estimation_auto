@@ -74,9 +74,9 @@ class CNN_LSTM_b(nn.Module):
         self.relu = nn.ReLU()
         self.flattened_size= self._get_flattened_size()
         self.lstm = nn.LSTM(input_size=64, hidden_size=32, num_layers=2,batch_first=True)
-        self.fc1 = nn.Linear(3328,1024)
-        self.fc2 = nn.Linear(1024,128) 
-        self.fc3 = nn.Linear(128,1)        
+        self.fc1 = nn.Linear(416,128)
+        self.fc2 = nn.Linear(128,32) 
+        self.fc3 = nn.Linear(32,1)        
         
     def _get_flattened_size(self):
         x = torch.zeros(1,2,window_len_sample_downsampled) # one sample regardless the batch size, num channels, num timepoints
