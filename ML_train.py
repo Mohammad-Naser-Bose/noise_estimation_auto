@@ -1,6 +1,7 @@
 from imports import *
 import user_inputs
 import splitting_normalization
+import csv
 
 
 class CNN(nn.Module):
@@ -72,10 +73,10 @@ class CNN_LSTM_b(nn.Module):
         self.pool = nn.MaxPool1d(kernel_size=2, stride=2, padding=0)
         self.relu = nn.ReLU()
         self.flattened_size= self._get_flattened_size()
-        self.lstm = nn.LSTM(input_size=self.flattened_size, hidden_size=512, num_layers=1)
-        self.fc1 = nn.Linear(512,256)
-        self.fc2 = nn.Linear(256,64)        
-        self.fc3 = nn.Linear(64,1)
+        self.lstm = nn.LSTM(input_size=64, hidden_size=32, num_layers=2,batch_first=True)
+        self.fc1 = nn.Linear(3328,1024)
+        self.fc2 = nn.Linear(1024,128) 
+        self.fc3 = nn.Linear(128,1)        
         
     def _get_flattened_size(self):
         x = torch.zeros(1,2,window_len_sample_downsampled) # one sample regardless the batch size, num channels, num timepoints
@@ -90,15 +91,15 @@ class CNN_LSTM_b(nn.Module):
         x = self.pool(self.relu(self.conv3(x)))
 
         x_dim = x.dim()
-        if x_dim==3:
-            x=x.view(x.size(0), -1)
-        else:
-            x=x.view(-1)
+        if x_dim ==3:
+            x=x.permute(0,2,1)
+        elif x_dim ==2:
+            x=x.permute(2,1)
 
         x,_ = self.lstm(x)
 
-        x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))  
+        x = self.relu(self.fc1(x.flatten()))
+        x = self.relu(self.fc2(x))
         x = self.fc3(x)
         return x
 class CNN_LSTM_a(nn.Module):
@@ -136,35 +137,35 @@ class CNN_LSTM_a(nn.Module):
 class CNN_LSTM_c(nn.Module):
     def __init__(self):
         super(CNN_LSTM_c, self).__init__()
-        self.lstm = nn.LSTM(input_size=window_len_sample_downsampled, hidden_size=500, num_layers=5)
+        self.lstm = nn.LSTM(input_size=2, hidden_size=64, num_layers=2, batch_first=True)
 
-        self.conv1 = nn.Conv1d(in_channels=2, out_channels=16, kernel_size=2, stride=2, padding=1, dilation=1)
+        self.conv1 = nn.Conv1d(in_channels=64, out_channels=1, kernel_size=3, stride=3, padding=1, dilation=1)        
         self.pool = nn.MaxPool1d(kernel_size=2, stride=2, padding=0)
-        self.relu = nn.ReLU(negative_slope=0.01)
-        self.flattened_size= self._get_flattened_size()
-        self.fc1 = nn.Linear(self.flattened_size,256)
-        self.fc2 = nn.Linear(256,64)
-        self.fc3= nn.Linear(64,1)
+        self.relu = nn.ReLU()
+        #self.flattened_size= self._get_flattened_size()
+        self.fc1= nn.Linear(460,64)
+        self.fc2= nn.Linear(64,1)
         
-    def _get_flattened_size(self):
-        x = torch.zeros(1,2,window_len_sample_downsampled) # one sample regardless the batch size, num channels, num timepoints
-        x,_  = self.lstm(x)
-        x = self.pool(self.relu(self.conv1(x)))
-        return x.numel()
+    # def _get_flattened_size(self):
+    #     x = torch.zeros(1,2,2) # one sample regardless the batch size, num channels, num timepoints
+    #     x,_  = self.lstm(x)
+    #     x = self.pool(self.relu(self.conv1(x)))
+    #     return x.numel()
 
     def forward(self,x):
-        x,_  = self.lstm(x)
-        x = self.pool(self.relu(self.conv1(x)))
-
         x_dim = x.dim()
         if x_dim==3:
-            x=x.view(x.size(0), -1)
+            x_reshaped = x.permute(0,2,1)
+            x,_  = self.lstm(x_reshaped)
+            x_reshaped_2= x.permute(0,2,1)
         else:
-            x=x.view(-1)
+            x,_  = self.lstm(x.permute(1,0))
+            x_reshaped_2= x.permute(1,0)
+        
+        x = self.pool(self.relu(self.conv1(x_reshaped_2)))   
 
         x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = self.fc2(x)
         return x
 class NN(nn.Module):
     def __init__(self):
@@ -224,14 +225,18 @@ def plotting_performance(loss_values,title):
     #plt.show()
     plt.savefig("Training error_per_epoch.png")
 def plotting_results_general_training(error,predictions,gt,printing_label):
-    error_ready = [element for array in error for element in array.tolist()]
-    # plt.figure(figsize=(10,5))
-    # plt.hist(error_ready,bins=100)
-    # plt.xlabel("Error [%]")
-    # plt.ylabel("Num of datapoints")
-    # #plt.title(title)
-    # #plt.show()
-    # plt.savefig(f"{printing_label} histogram performance.png")
+    error_ready_temp = [element for array in error for element in array.tolist()]; error_ready = [1000 if math.isinf(x) else x for x in error_ready_temp]
+    # with open("csv_file.csv",mode="w",newline="") as file:
+    #     writer=csv.writer(file)
+    #     for item in error_ready_temp:
+    #         writer.writerow([item])
+    plt.figure(figsize=(10,5))
+    plt.hist(error_ready,bins=100)
+    plt.xlabel("Error [%]")
+    plt.ylabel("Num of datapoints")
+    #plt.title(title)
+    #plt.show()
+    plt.savefig(f"{printing_label} histogram performance.png")
 
     real_ready = [element for array in gt for element in array.tolist()]
     pred_ready = [element for array in predictions for element in array.tolist()]
@@ -251,7 +256,7 @@ def run_ML(train_inputs,train_labels):
     reg_criterion = nn.MSELoss()
     model = my_ML_model 
     optimizer = optim.Adam(model.parameters(),lr=0.001)
-    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min",factor=0.1, patience=10)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min",factor=0.1, patience=5)
 
     train_loss_values = []
     error=[]
@@ -293,11 +298,24 @@ def run_ML(train_inputs,train_labels):
 
         avg_train_loss = running_train_loss / num_train_batches
         train_loss_values.append(avg_train_loss)
-        #scheduler.step(avg_train_loss)
+        scheduler.step(avg_train_loss)
 
-        #print(scheduler.get_last_lr())
+        ooo = scheduler.get_last_lr()
+        print(ooo)
+
+    with open("train_loss_values.pkl","wb") as file:
+        pickle.dump(train_loss_values,file)
+    with open("error.pkl","wb") as file:
+        pickle.dump(error,file)
+    with open("predictions.pkl","wb") as file:
+        pickle.dump(predictions,file)
+    with open("gt.pkl","wb") as file:
+        pickle.dump(gt,file)
+
+
 
     plotting_performance(train_loss_values,"Training")
+    plotting_results_general_training(error,predictions,gt, "Training")
 
     return model
 
@@ -322,6 +340,3 @@ elif ML_type == "FC":
     my_ML_model = FC()     
 
 model = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)
-
-    #### things different from previous: the way the gain is applied, the noise feature is different, and only one window of each noise file was considered.
-    ####### TRY SAME STANDARIZATION (MIN-MAX), AND [-1 1] NOT [0 1]

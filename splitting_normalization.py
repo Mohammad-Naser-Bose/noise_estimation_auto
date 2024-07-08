@@ -43,7 +43,7 @@ def FE(data_1, data_2, data_3):
         my_data = recording[1]
         RMS_values_1 [i] = np.sqrt(np.mean((np.array(my_data)**2)))
     temp_arr = np.hstack(list(RMS_values_1.values())).reshape(-1, 1)
-    scaler = MinMaxScaler()
+    scaler = MinMaxScaler(feature_range=(0, 1))
     scaler.fit(temp_arr)
     temp_arr_new = scaler.transform(temp_arr)
     RMS_values_new_1 = {}
