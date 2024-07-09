@@ -1,7 +1,6 @@
 from imports import *
 import user_inputs
 import splitting_normalization
-import csv
 
 
 class CNN(nn.Module):
@@ -14,10 +13,8 @@ class CNN(nn.Module):
         self.relu = nn.ReLU()
         self.flattened_size= self._get_flattened_size()
         self.fc1 = nn.Linear(self.flattened_size,128)
-        # self.fc2 = nn.Linear(4096,1024)
-        # self.fc3= nn.Linear(1024,256)
-        self.fc4= nn.Linear(128,32)
-        self.fc5= nn.Linear(32,1)
+        self.fc2= nn.Linear(128,32)
+        self.fc3= nn.Linear(32,1)
 
     def _get_flattened_size(self):
         x = torch.zeros(1,2,window_len_sample_downsampled) # one sample regardless the batch size, num channels, num timepoints
@@ -38,8 +35,8 @@ class CNN(nn.Module):
         x = self.relu(self.fc1(x))
         # x = self.relu(self.fc2(x))
         # x = self.relu(self.fc3(x))
-        x = self.relu(self.fc4(x))
-        x = self.fc5(x)
+        x = self.relu(self.fc2(x))
+        x = self.fc3(x)
         return x
 class CNN_LSTM(nn.Module):
     def __init__(self):
@@ -105,15 +102,24 @@ def plotting_performance(loss_values,title):
     plt.title(title)
     #plt.show()
     plt.savefig("Training error_per_epoch.png")
-def plotting_results_general_training(error,predictions,gt,printing_label):
-    error_ready_temp = [element for array in error for element in array.tolist()]; error_ready = [1000 if math.isinf(x) else x for x in error_ready_temp]
-    # with open("csv_file.csv",mode="w",newline="") as file:
-    #     writer=csv.writer(file)
-    #     for item in error_ready_temp:
-    #         writer.writerow([item])
+def save_results(model, train_loss_values, error, predictions,gt):
+    with open("train_loss_values.pkl","wb") as file:
+        pickle.dump(train_loss_values,file)
+    with open("error.pkl","wb") as file:
+        pickle.dump(error,file)
+    with open("predictions.pkl","wb") as file:
+        pickle.dump(predictions,file)
+    with open("gt.pkl","wb") as file:
+        pickle.dump(gt,file)
+    return
+def plotting_results(error,predictions,gt,printing_label):
+    error_ready= [element for array in error for element in array.tolist()]
     plt.figure(figsize=(10,5))
-    plt.hist(error_ready,bins=100)
-    plt.xlabel("Error [%]")
+    capped_data = np.clip(error_ready,a_min=None, a_max=100)
+    bins=np.append(np.linspace(0,100,10),np.inf)
+    hist, bin_edges = np.histogram(capped_data,bins=bins)
+    plt.hist(capped_data,bins=bin_edges,edgecolor="black")
+    plt.xlabel("Error [%]")    
     plt.ylabel("Num of datapoints")
     #plt.title(title)
     #plt.show()
@@ -143,6 +149,7 @@ def run_ML(train_inputs,train_labels):
     error=[]
     predictions=[]
     gt=[]
+    master_c = 0
     for epoch in range(num_epochs):
         print("-----------------------------")
         print("epoch:", epoch)
@@ -160,9 +167,11 @@ def run_ML(train_inputs,train_labels):
             optimizer.step()
             running_train_loss += loss_value.item()
 
-            print("real:", targets.detach().cpu().numpy().flatten())
-            print("pred:", outputs.detach().cpu().numpy().flatten())
-            print("-------")
+            if master_c % 10 ==0:
+                print("real:", targets.detach().cpu().numpy().flatten())
+                print("pred:", outputs.detach().cpu().numpy().flatten())
+                print("-------")
+            master_c +=1
             
             if epoch == num_epochs-1:
                 ground_truth_values = targets.detach().cpu().numpy().flatten()
@@ -179,24 +188,14 @@ def run_ML(train_inputs,train_labels):
         scheduler.step(avg_train_loss)
 
         ooo = scheduler.get_last_lr()
-        print(ooo)
-
-    with open("train_loss_values.pkl","wb") as file:
-        pickle.dump(train_loss_values,file)
-    with open("error.pkl","wb") as file:
-        pickle.dump(error,file)
-    with open("predictions.pkl","wb") as file:
-        pickle.dump(predictions,file)
-    with open("gt.pkl","wb") as file:
-        pickle.dump(gt,file)
+        print("Learning Rate:",ooo)
 
 
-
+    save_results(model, train_loss_values, error, predictions,gt)
     plotting_performance(train_loss_values,"Training")
-    plotting_results_general_training(error,predictions,gt, "Training")
+    plotting_results(error,predictions,gt, "Training")
 
     return model
-
 
 
 
@@ -204,6 +203,7 @@ window_len_sample_downsampled = user_inputs.window_len_sample_downsampled
 ML_type = user_inputs.ML_type
 batch_size = user_inputs.batch_size
 num_epochs = user_inputs.num_epochs
+
 if ML_type == "CNN":
     my_ML_model = CNN()
 elif ML_type == "CNN_LSTM":

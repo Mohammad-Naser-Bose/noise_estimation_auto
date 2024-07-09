@@ -15,3 +15,5 @@ def adding_gain_noise(data,gains):
     return adjusted_rec
 
 Data_C = adding_gain_noise(resampling.Data_B, user_inputs.noise_gains)
+
+stop=1

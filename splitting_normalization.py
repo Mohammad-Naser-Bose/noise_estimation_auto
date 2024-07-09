@@ -2,6 +2,7 @@ from imports import *
 import windowing
 import user_inputs
 
+
 def data_splitting(x, y, z):
     keys = list(x.keys())
     random.shuffle(keys)
@@ -25,7 +26,6 @@ def data_splitting(x, y, z):
     test_z= {key: z[key] for key in test_keys}
 
     return train_x, val_x, test_x, train_y, val_y, test_y, train_z, val_z, test_z, train_keys, val_keys, test_keys
-
 def normalization (train_no_norm, val_no_norm, test_no_norm):
 
     all_windows_training = np.concatenate ([np.array(value) for value in train_no_norm.values()])
@@ -36,7 +36,6 @@ def normalization (train_no_norm, val_no_norm, test_no_norm):
     normalized_testing_windows = {key:scaler.transform(np.array(value).reshape(-1,1)).flatten().tolist() for key, value in test_no_norm.items()}
 
     return normalized_training_windows, normalized_validation_windows, normalized_testing_windows
-
 def FE(data_1, data_2, data_3):
     RMS_values_1 = {}
     for i, recording in enumerate (data_1.items()):
@@ -71,7 +70,6 @@ def FE(data_1, data_2, data_3):
         RMS_values_new_3[i] = np.array(temp_arr_new[i], dtype= np.float32)
 
     return RMS_values_new_1, RMS_values_new_2, RMS_values_new_3
-
 def data_prep_for_ML(channel1, channel2):
     keys = sorted(channel1.keys())
     data1_tensors = [torch.tensor(channel1[key]) for key in keys]

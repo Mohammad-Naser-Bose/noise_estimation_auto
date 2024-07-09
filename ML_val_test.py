@@ -27,7 +27,7 @@ def ML_validating(model, val_inputs,val_labels):
         errors_val.append(((abs(ground_truth_value-predicted_value))/(ground_truth_value))*100)
         all_pred.append(predicted_value)
         all_gt.append(ground_truth_value)
-    plotting_results_general_other(errors_val,all_pred,all_gt,"Validation")
+    plotting_results(errors_val,all_pred,all_gt,"Validation")
 
     return model
 def ML_testing(model, test_inputs, test_labels):
@@ -60,8 +60,8 @@ def ML_testing(model, test_inputs, test_labels):
     #print(f"Test loss: {avg_test_loss}")
 
     printing_label = "Testing"
-    plotting_results_general_other(errors_test,all_pred,all_gt,printing_label)
-def plotting_results_general_other(error,predictions,gt,printing_label):
+    plotting_results(errors_test,all_pred,all_gt,printing_label)
+def plotting_results(error,predictions,gt,printing_label):
     error_ready = [element for array in error for element in array.tolist()]
     plt.figure(figsize=(10,5))
     capped_data = np.clip(error_ready,a_min=None, a_max=100)
