@@ -13,7 +13,7 @@ def concatenating_noise(music, noise):
 def mixing(audio, noise):
     mixed_signal_sin_rec = {}
     for i in range (0, len(audio)):
-        mixed_signal_sin_rec[i] = audio[i] + noise[i]
+        mixed_signal_sin_rec[i]=audio[i] + noise[i]
     return mixed_signal_sin_rec
 
 

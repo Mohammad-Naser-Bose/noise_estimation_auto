@@ -7,7 +7,7 @@ def loading_data(dir,label):
         cuttoff_samples = user_inputs.window_len_sample
     else:
         num_files = user_inputs.num_music_files
-        cuttoff_samples = None
+        cuttoff_samples = 3969000 # 90s
     
     files = os.listdir(dir)[:num_files] 
 
@@ -19,6 +19,10 @@ def loading_data(dir,label):
         if user_inputs.one_noise_window_flag==True:
             if cuttoff_samples:
                 audio_data = audio_data[:cuttoff_samples]
+        if user_inputs.shortest_music_flag==True:
+            if cuttoff_samples:
+                audio_data = audio_data[:cuttoff_samples]
+
         full_recordings[i] = audio_data 
     
     return full_recordings
