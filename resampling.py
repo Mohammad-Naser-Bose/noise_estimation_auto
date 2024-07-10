@@ -1,7 +1,7 @@
 from imports import *
 import user_inputs
 import loading_data
-import sounddevice as sd
+#import sounddevice as sd
 
 def resampling(orig_data,label):
     full_resampled_data={}
