@@ -142,6 +142,7 @@ def run_ML(train_inputs,train_labels):
     dataloader = DataLoader(dataset,batch_size=batch_size, shuffle=True)
     reg_criterion = nn.MSELoss()
     model = my_ML_model 
+    model.to(user_inputs.device)
     optimizer = optim.Adam(model.parameters(),lr=0.001)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min",factor=0.1, patience=5)
 
