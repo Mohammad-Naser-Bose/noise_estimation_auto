@@ -18,7 +18,7 @@ shortest_music_flag = False
 noise_gains = [-3,-5, -7] # dB
 sought_ratio = [np.array([4,6,15,1,1]),
                 np.array([2,4,12,1,1]),
-                np.array([4,7,13,1,1])],
+                np.array([4,7,13,1,1])]#,
                 #np.array([3,6,12,1,1])]  # Linear (each line is a different gain profile and one profile has different values for each music file) 
 
 ML_type = "CNN_LSTM"

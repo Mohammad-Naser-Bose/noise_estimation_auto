@@ -45,7 +45,7 @@ def transfer_fun(Data):
             for i in range (0, len(Data)):
                 audio_transformed_single_rec = butter_filter(Data[i], freq, 690,5,type)
                 audio_transformed[master_c] = np.squeeze(audio_transformed_single_rec)
-                plotting_tf(Data[i],audio_transformed[master_c]) 
+                #plotting_tf(Data[i],audio_transformed[master_c]) 
                 master_c+=1
         return audio_transformed
 
