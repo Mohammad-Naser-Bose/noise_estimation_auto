@@ -13,3 +13,12 @@ import IPython.display as ipd
 import scipy.signal as signal
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import math
+
+if torch.cuda.is_available():
+    print("yeeeeeeeeeeees")
+else: 
+    print("nooooooooooooo")
+
+print(torch.__version__)
+
+torch.zeros(1).cuda()
