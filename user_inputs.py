@@ -9,14 +9,19 @@ train_ratio = .7
 val_ratio = .15
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344
 batch_size = 32
-use_filter=False
-filter_num_coeff = [1]
-filter_dem_coeff = [1, 1]
+use_tf=True
+num_tfs = 2
+
+num_coeffs = [[.8+.79j, .8-.79j, -1],
+              [.11+.79j, .11-.79j, 1]]
+den_coeffs = [[.1, 0, 0],
+              [.1, 0, 0]]# Each line is a different tf
+
 normalization_flag = True
 one_noise_window_flag = True
-noise_gains = [-3] # dB
-sought_ratio = [np.array([4,6,15,1,1])]#,
-                #np.array([2,4,12,1,1]),
+noise_gains = [-3,-5,-7] # dB
+sought_ratio = [np.array([4,6,15,1,1]),
+                np.array([2,4,12,1,1])]#,
                 #np.array([4,7,13,1,1]),
                 #np.array([3,6,12,1,1])]  # Linear (each line is a different gain profile and one profile has different values for each music file) 
 

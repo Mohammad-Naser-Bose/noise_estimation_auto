@@ -6,7 +6,7 @@ import applying_gain_noise
 def apply_music_gain(audio_full):
     factors_list = []
     for mod_f in user_inputs.sought_ratio:
-        [factors_list.append(val) for n in range(0, user_inputs.num_noise_files*len(user_inputs.noise_gains)) for val in mod_f]
+        [factors_list.append(val)  for n in range(0, user_inputs.num_noise_files*len(user_inputs.noise_gains)) for nn in range (0, user_inputs.num_tfs) for val in mod_f]
               
     modified_music = {}
     for key, value in audio_full.items():
