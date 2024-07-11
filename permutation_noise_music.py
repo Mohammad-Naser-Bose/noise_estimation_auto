@@ -7,7 +7,7 @@ def permutations(music, noise):
     duplicated_music = {}
     duplicated_noise = {}
     master_c = 0
-    for iii in range(0, len(user_inputs.sought_ratio)):
+    for iii in range(0, len(user_inputs.SNRs)):
         for ii in range (0, len(noise)):
             for i in range (0, len(music)):
                 duplicated_music[master_c]=music[i]

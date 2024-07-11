@@ -118,11 +118,11 @@ def plotting_results(error,predictions,gt,printing_label):
 
     real_ready = [element for array in gt for element in array.tolist()]
     pred_ready = [element for array in predictions for element in array.tolist()]
-    diff = [a-b for a,b in zip(real_ready,pred_ready)]
+    #diff = [a-b for a,b in zip(real_ready,pred_ready)]
     plt.figure(figsize=(10,5))
     plt.plot(real_ready,label="orig")
     plt.plot(pred_ready,label="pred")
-    plt.plot(diff,label="diff")
+    #plt.plot(diff,label="diff")
     plt.legend()
     plt.xlabel("datapoint")
     plt.ylabel("Noise RMS")

@@ -10,17 +10,14 @@ train_ratio = .7
 val_ratio = .15
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344
 batch_size = 32
-use_tf=True
+use_tf=False
 num_tfs = 3 
 tf_types = ["bandpass","lowpass","highpass"]
 normalization_flag = True
 one_noise_window_flag = True
 shortest_music_flag = False
-noise_gains = [-3,-5,-7] # dB
-sought_ratio = [np.array([4,6,15,1,1]),
-                np.array([2,4,12,1,1]),
-                np.array([4,7,13,1,1])]#,
-                #np.array([3,6,12,1,1])]  # Linear (each line is a different gain profile and one profile has different values for each music file) 
+noise_gains = [0] # dB
+SNRs = [.5]                
 
 ML_type = "CNN_LSTM"
 norm_feature =True
@@ -31,7 +28,7 @@ noise_files = os.listdir(noise_dir); num_noise_combinations=sum(os.path.isfile(o
 num_noise_files = len(noise_files)
 music_files = os.listdir(recordings_dir)
 num_music_files = len(music_files)
-num_datapoints_nw=len(noise_gains)*len(sought_ratio)*num_noise_files*num_music_files
+num_datapoints_nw=len(noise_gains)*len(SNRs)*num_noise_files*num_music_files
 
 if torch.cuda.is_available():
     print("GPU is active")

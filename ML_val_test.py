@@ -15,7 +15,10 @@ def ML_validating(model, val_inputs,val_labels):
     all_gt=[]
     for i in range(0, len(val_inputs)):
         my_input = val_inputs[i].requires_grad_(True)
-        ground_truth_value = torch.tensor(val_labels[i])        
+        ground_truth_value = torch.tensor(val_labels[i])  
+
+        my_input = my_input.to(device)
+        ground_truth_value = ground_truth_value.to(device)      
 
         predicted_value = model(my_input)
         loss_value = reg_criterion(predicted_value,ground_truth_value)
@@ -42,7 +45,10 @@ def ML_testing(model, test_inputs, test_labels):
     all_pred=[]
     for i in range(0, len(test_inputs)):
         my_input = test_inputs[i].requires_grad_(True)
-        ground_truth_value = torch.tensor(test_labels[i])        
+        ground_truth_value = torch.tensor(test_labels[i])  
+
+        my_input = my_input.to(device)
+        ground_truth_value = ground_truth_value.to(device) 
 
         predicted_value = model(my_input)
         loss_value = reg_criterion(predicted_value,ground_truth_value)
@@ -77,11 +83,11 @@ def plotting_results(error,predictions,gt,printing_label):
 
     real_ready = [value.item() for value in gt]
     pred_ready = [value.item() for value in predictions]
-    diff = [a-b for a,b in zip(real_ready,pred_ready)]
+    #diff = [a-b for a,b in zip(real_ready,pred_ready)]
     plt.figure(figsize=(10,5))
     plt.plot(real_ready,label="orig")
     plt.plot(pred_ready,label="pred")
-    plt.plot(diff,label="diff")
+    #plt.plot(diff,label="diff")
     plt.legend()
     plt.xlabel("datapoint")
     plt.ylabel("Noise RMS")
@@ -100,9 +106,10 @@ def generate_report(time, num_music, num_noise, noise_gains, SNRs, tf_types,mode
         file.write(f"training loss: {training_loss}\n")
     return 
 ### import model
+device = "cuda"
 ML_validating(ML_train.model, splitting_normalization.data_val_xy, splitting_normalization.val_z_norm_l)
 ML_testing(ML_train.model, splitting_normalization.data_test_xy, splitting_normalization.test_z_norm_l)
 
 end_time = time.time()
 full_time = end_time-user_inputs.start_time
-generate_report(full_time,user_inputs.num_music_files,user_inputs.num_noise_files, user_inputs.noise_gains, user_inputs.sought_ratio, user_inputs.tf_types, user_inputs.ML_type,ML_train.train_loss_values[:-1])
+generate_report(full_time,user_inputs.num_music_files,user_inputs.num_noise_files, user_inputs.noise_gains, user_inputs.SNRs, user_inputs.tf_types, user_inputs.ML_type,ML_train.train_loss_values[:-1])
