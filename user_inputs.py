@@ -5,7 +5,7 @@ recordings_dir = r"audio_files_short"
 noise_dir = r"noise_files"
 window_size_sec = 4  # in [s]
 sampling_freq = 44100  # in [Hz]  
-num_epochs=2
+num_epochs=100
 train_ratio = .7
 val_ratio = .15
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344
@@ -33,6 +33,7 @@ music_files = os.listdir(recordings_dir)
 num_music_files = len(music_files)
 num_datapoints_nw=len(noise_gains)*len(sought_ratio)*num_noise_files*num_music_files
 
-# if torch.cuda.is_available():
-#     print("GPU is active")
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if torch.cuda.is_available():
+    print("GPU is active")
+else:
+    print("noooooooooooo")

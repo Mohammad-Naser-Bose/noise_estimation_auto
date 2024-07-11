@@ -134,7 +134,8 @@ def run_ML(train_inputs,train_labels):
     dataloader = DataLoader(dataset,batch_size=batch_size, shuffle=True)
     reg_criterion = nn.MSELoss()
     model = my_ML_model 
-    #model.to(user_inputs.device)
+    model = model.to(device)
+
     optimizer = optim.Adam(model.parameters(),lr=0.001)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min",factor=0.1, patience=5)
 
@@ -149,8 +150,11 @@ def run_ML(train_inputs,train_labels):
         model.train()
         running_train_loss = 0
         num_train_batches = len(train_inputs)
+        
 
         for batch_idx, (inputs, targets) in enumerate(dataloader):
+            inputs = inputs.to(device)
+            targets = targets.to(device)
             optimizer.zero_grad()
             inputs = inputs.to(torch.float32)
             outputs = model(inputs.squeeze(1))
@@ -180,8 +184,8 @@ def run_ML(train_inputs,train_labels):
         train_loss_values.append(avg_train_loss)
         scheduler.step(avg_train_loss)
 
-        ooo = scheduler.get_last_lr()
-        print("Learning Rate:",ooo)
+        # ooo = scheduler.get_last_lr()
+        # print("Learning Rate:",ooo)
 
     plotting_performance(train_loss_values,"Training")
     plotting_results(error,predictions,gt, "Training")
@@ -199,7 +203,7 @@ if ML_type == "CNN":
     my_ML_model = CNN()
 elif ML_type == "CNN_LSTM":
     my_ML_model = CNN_LSTM()             
-
+device ="cuda"
 model,train_loss_values = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)
 
 with open("Model.pkl","wb") as file:
