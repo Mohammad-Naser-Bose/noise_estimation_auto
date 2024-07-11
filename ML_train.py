@@ -3,6 +3,7 @@ import user_inputs
 import splitting_normalization
 
 
+
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
@@ -102,16 +103,6 @@ def plotting_performance(loss_values,title):
     plt.title(title)
     #plt.show()
     plt.savefig("Training error_per_epoch.png")
-def save_results(model, train_loss_values, error, predictions,gt):
-    with open("train_loss_values.pkl","wb") as file:
-        pickle.dump(train_loss_values,file)
-    with open("error.pkl","wb") as file:
-        pickle.dump(error,file)
-    with open("predictions.pkl","wb") as file:
-        pickle.dump(predictions,file)
-    with open("gt.pkl","wb") as file:
-        pickle.dump(gt,file)
-    return
 def plotting_results(error,predictions,gt,printing_label):
     error_ready= [element for array in error for element in array.tolist()]
     plt.figure(figsize=(10,5))
@@ -131,6 +122,7 @@ def plotting_results(error,predictions,gt,printing_label):
     plt.figure(figsize=(10,5))
     plt.plot(real_ready,label="orig")
     plt.plot(pred_ready,label="pred")
+    plt.plot(diff,label="diff")
     plt.legend()
     plt.xlabel("datapoint")
     plt.ylabel("Noise RMS")
@@ -142,7 +134,7 @@ def run_ML(train_inputs,train_labels):
     dataloader = DataLoader(dataset,batch_size=batch_size, shuffle=True)
     reg_criterion = nn.MSELoss()
     model = my_ML_model 
-    model.to(user_inputs.device)
+    #model.to(user_inputs.device)
     optimizer = optim.Adam(model.parameters(),lr=0.001)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min",factor=0.1, patience=5)
 
@@ -191,12 +183,10 @@ def run_ML(train_inputs,train_labels):
         ooo = scheduler.get_last_lr()
         print("Learning Rate:",ooo)
 
-
-    save_results(model, train_loss_values, error, predictions,gt)
     plotting_performance(train_loss_values,"Training")
     plotting_results(error,predictions,gt, "Training")
 
-    return model
+    return model, train_loss_values
 
 
 
@@ -210,4 +200,9 @@ if ML_type == "CNN":
 elif ML_type == "CNN_LSTM":
     my_ML_model = CNN_LSTM()             
 
-model = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)
+model,train_loss_values = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)
+
+with open("Model.pkl","wb") as file:
+    pickle.dump(model,file) 
+
+stop=1

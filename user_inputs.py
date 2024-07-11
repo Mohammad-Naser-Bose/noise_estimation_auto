@@ -1,10 +1,11 @@
 from imports import *
 
+start_time = time.time()
 recordings_dir = r"audio_files_short"
 noise_dir = r"noise_files"
 window_size_sec = 4  # in [s]
 sampling_freq = 44100  # in [Hz]  
-num_epochs=100
+num_epochs=2
 train_ratio = .7
 val_ratio = .15
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344
@@ -15,7 +16,7 @@ tf_types = ["bandpass","lowpass","highpass"]
 normalization_flag = True
 one_noise_window_flag = True
 shortest_music_flag = False
-noise_gains = [-3,-5, -7] # dB
+noise_gains = [-3,-5,-7] # dB
 sought_ratio = [np.array([4,6,15,1,1]),
                 np.array([2,4,12,1,1]),
                 np.array([4,7,13,1,1])]#,
@@ -32,6 +33,6 @@ music_files = os.listdir(recordings_dir)
 num_music_files = len(music_files)
 num_datapoints_nw=len(noise_gains)*len(sought_ratio)*num_noise_files*num_music_files
 
-if torch.cuda.is_available():
-    print("GPU is active")
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# if torch.cuda.is_available():
+#     print("GPU is active")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -1,0 +1,8 @@
+time: 23.434026956558228
+num_music: 3
+num_noise: 3
+noise_gains: [-3, -5, -7]
+SNRs: [array([ 4,  6, 15,  1,  1]), array([ 2,  4, 12,  1,  1]), array([ 4,  7, 13,  1,  1])]
+tf_types: ['bandpass', 'lowpass', 'highpass']
+model type: CNN_LSTM
+training loss: [0.003006664568181028]

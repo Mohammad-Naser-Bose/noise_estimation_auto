@@ -1,6 +1,7 @@
 from imports import *
 import splitting_normalization
 import ML_train
+import user_inputs
 
 def ML_validating(model, val_inputs,val_labels):
     reg_criterion = nn.MSELoss()
@@ -76,16 +77,32 @@ def plotting_results(error,predictions,gt,printing_label):
 
     real_ready = [value.item() for value in gt]
     pred_ready = [value.item() for value in predictions]
+    diff = [a-b for a,b in zip(real_ready,pred_ready)]
     plt.figure(figsize=(10,5))
     plt.plot(real_ready,label="orig")
     plt.plot(pred_ready,label="pred")
+    plt.plot(diff,label="diff")
     plt.legend()
     plt.xlabel("datapoint")
     plt.ylabel("Noise RMS")
     #plt.title(title)
     #plt.show()
     plt.savefig(f"{printing_label} raw performance.png")
-
+def generate_report(time, num_music, num_noise, noise_gains, SNRs, tf_types,model_type, training_loss):
+    with open ("Results report","w") as file:
+        file.write(f"time: {time}\n")
+        file.write(f"num_music: {num_music}\n")
+        file.write(f"num_noise: {num_noise}\n")
+        file.write(f"noise_gains: {noise_gains}\n")
+        file.write(f"SNRs: {SNRs}\n")
+        file.write(f"tf_types: {tf_types}\n")
+        file.write(f"model type: {model_type}\n")
+        file.write(f"training loss: {training_loss}\n")
+    return 
 ### import model
 ML_validating(ML_train.model, splitting_normalization.data_val_xy, splitting_normalization.val_z_norm_l)
 ML_testing(ML_train.model, splitting_normalization.data_test_xy, splitting_normalization.test_z_norm_l)
+
+end_time = time.time()
+full_time = end_time-user_inputs.start_time
+generate_report(full_time,user_inputs.num_music_files,user_inputs.num_noise_files, user_inputs.noise_gains, user_inputs.sought_ratio, user_inputs.tf_types, user_inputs.ML_type,ML_train.train_loss_values[:-1])
