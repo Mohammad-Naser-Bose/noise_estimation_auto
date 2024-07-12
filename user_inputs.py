@@ -9,15 +9,15 @@ num_epochs=100
 train_ratio = .7
 val_ratio = .15
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344
-batch_size = 32
+batch_size = 4
 use_tf=False
 num_tfs = 3 
-tf_types = ["bandpass","lowpass","highpass"]
+tf_types = ["lowpass"]#,"bandpass","highpass"]
 normalization_flag = True
 one_noise_window_flag = True
 shortest_music_flag = False
-noise_gains = [0] # dB
-SNRs = [.5]                
+noise_gains = [-3, -5] # dB
+SNRs = [.25, .75]                
 
 ML_type = "CNN_LSTM"
 norm_feature =True
