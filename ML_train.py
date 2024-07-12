@@ -3,42 +3,6 @@ import user_inputs
 import splitting_normalization
 
 
-
-class CNN(nn.Module):
-    def __init__(self):
-        super(CNN, self).__init__()
-        self.conv1 = nn.Conv1d(in_channels=2, out_channels=16, kernel_size=3, stride=3, padding=1, dilation=1)
-        self.conv2 = nn.Conv1d(in_channels=16, out_channels=32, kernel_size=3, stride=3, padding=1, dilation=1)
-        self.conv3 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3, stride=3, padding=1, dilation=1)
-        self.pool = nn.AvgPool1d(kernel_size=2, stride=2, padding=0)
-        self.relu = nn.ReLU()
-        self.flattened_size= self._get_flattened_size()
-        self.fc1 = nn.Linear(self.flattened_size,128)
-        self.fc2= nn.Linear(128,32)
-        self.fc3= nn.Linear(32,1)
-
-    def _get_flattened_size(self):
-        x = torch.zeros(1,2,window_len_sample_downsampled) # one sample regardless the batch size, num channels, num timepoints
-        x = self.pool(self.relu(self.conv1(x)))
-        x = self.pool(self.relu(self.conv2(x)))
-        x = self.pool(self.relu(self.conv3(x)))
-        return x.numel()
-
-    def forward(self,x):
-        x = self.pool(self.relu(self.conv1(x)))
-        x = self.pool(self.relu(self.conv2(x)))
-        x = self.pool(self.relu(self.conv3(x)))
-        x_dim = x.dim()
-        if x_dim==3:
-            x=x.view(x.size(0), -1)
-        else:
-            x=x.view(-1)
-        x = self.relu(self.fc1(x))
-        # x = self.relu(self.fc2(x))
-        # x = self.relu(self.fc3(x))
-        x = self.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
 class CNN_LSTM(nn.Module):
     def __init__(self):
         super(CNN_LSTM, self).__init__()
@@ -103,32 +67,62 @@ def plotting_performance(loss_values,title):
     plt.title(title)
     #plt.show()
     plt.savefig("Training error_per_epoch.png")
-def plotting_results(error,predictions,gt,printing_label):
-    error_ready= [element for array in error for element in array.tolist()]
-    plt.figure(figsize=(10,5))
-    capped_data = np.clip(error_ready,a_min=None, a_max=100)
-    bins=np.append(np.linspace(0,100,10),np.inf)
-    hist, bin_edges = np.histogram(capped_data,bins=bins)
-    plt.hist(capped_data,bins=bin_edges,edgecolor="black")
-    plt.xlabel("Error [%]")    
-    plt.ylabel("Num of datapoints")
-    #plt.title(title)
-    #plt.show()
-    plt.savefig(f"{printing_label} histogram performance.png")
-
+def plotting_db(error,predictions,gt,printing_label):
     real_ready = [element for array in gt for element in array.tolist()]
     pred_ready = [element for array in predictions for element in array.tolist()]
-    #diff = [a-b for a,b in zip(real_ready,pred_ready)]
-    plt.figure(figsize=(10,5))
-    plt.plot(real_ready,label="orig")
-    plt.plot(pred_ready,label="pred")
-    #plt.plot(diff,label="diff")
-    plt.legend()
-    plt.xlabel("datapoint")
-    plt.ylabel("Noise RMS")
-    #plt.title(title)
-    #plt.show()
-    plt.savefig(f"{printing_label} raw performance.png")
+    error_ready= [element for array in error for element in array.tolist()]
+
+    real_ready_unscaled = splitting_normalization.scaler.inverse_transform(np.array(real_ready).reshape((len(real_ready),1)))
+    pred_ready_unscaled = splitting_normalization.scaler.inverse_transform(np.array(pred_ready).reshape((len(pred_ready),1)))
+
+    real_ready_g = [element for array in real_ready_unscaled for element in array.tolist()]
+    pred_ready_g = [element for array in pred_ready_unscaled for element in array.tolist()]
+
+
+    real_noise_db = 20*np.log10(np.array(real_ready_g)/splitting_normalization.train_x_FE_norm_l)
+    pred_noise_db= 20*np.log10(np.array(pred_ready_g)/splitting_normalization.train_x_FE_norm_l)   
+    diff_1 = real_noise_db -pred_noise_db
+
+    fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
+    ax1.plot(real_noise_db,label="Original")
+    ax1.plot(pred_noise_db,label="Prediction")
+    ax1.legend()
+    ax1.set_xlabel("Datapoint")
+    ax1.set_ylabel("Noise RMS (dB)")
+    #ax1.show() 
+
+    ax2.plot(diff_1,label="Difference between actual and predicted noise",color="black")
+    ax2.legend()
+    ax2.set_xlabel("Datapoint")
+    ax2.set_ylabel("Noise RMS (dB)")
+    #ax1.show()
+    plt.tight_layout()
+    plt.savefig(f"{printing_label} raw performance.png")    
+
+    ##############
+    SNR_real_db = 20*np.log10(np.array(splitting_normalization.train_y_FE_norm_l)/np.array(real_ready_g))
+    SNR_pred_db = 20*np.log10(np.array(splitting_normalization.train_y_FE_norm_l)/np.array(pred_ready_g))
+    diff = SNR_real_db - SNR_pred_db
+
+    fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
+    ax1.plot(SNR_real_db,label="Original")
+    ax1.plot(SNR_pred_db,label="Prediction")
+    ax1.legend()
+    ax1.set_xlabel("Datapoint")
+    ax1.set_ylabel("SNR (dB)")
+    #ax1.show() 
+
+    ax2.plot(diff,label="Difference between actual and predicted noise",color="black")
+    ax2.legend()
+    ax2.set_xlabel("Datapoint")
+    ax2.set_ylabel("SNR (dB)")
+    #ax1.show()
+    plt.tight_layout()
+    plt.savefig(f"{printing_label} raw performance2.png")  
+
+
+    
+    return(np.mean(diff_1))
 def run_ML(train_inputs,train_labels):
     dataset = CustomDataset(train_inputs,train_labels)
     dataloader = DataLoader(dataset,batch_size=batch_size, shuffle=True)
@@ -137,7 +131,7 @@ def run_ML(train_inputs,train_labels):
     model = model.to(device)
 
     optimizer = optim.Adam(model.parameters(),lr=0.001)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min",factor=0.1, patience=5)
+    #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min",factor=0.1, patience=5)
 
     train_loss_values = []
     error=[]
@@ -182,15 +176,16 @@ def run_ML(train_inputs,train_labels):
 
         avg_train_loss = running_train_loss / num_train_batches
         train_loss_values.append(avg_train_loss)
-        scheduler.step(avg_train_loss)
+        #scheduler.step(avg_train_loss)
 
         # ooo = scheduler.get_last_lr()
         # print("Learning Rate:",ooo)
 
     plotting_performance(train_loss_values,"Training")
-    plotting_results(error,predictions,gt, "Training")
+    #plotting_results(error,predictions,gt, "Training")
+    pm_training = plotting_db(error,predictions,gt, "Training")
 
-    return model, train_loss_values
+    return model, train_loss_values, pm_training
 
 
 
@@ -199,14 +194,11 @@ ML_type = user_inputs.ML_type
 batch_size = user_inputs.batch_size
 num_epochs = user_inputs.num_epochs
 
-if ML_type == "CNN":
-    my_ML_model = CNN()
-elif ML_type == "CNN_LSTM":
+if ML_type == "CNN_LSTM":
     my_ML_model = CNN_LSTM()             
 device ="cuda"
-model,train_loss_values = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)
+model,train_loss_values, pm_training = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)
 
 with open("Model.pkl","wb") as file:
     pickle.dump(model,file) 
-
 stop=1

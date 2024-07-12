@@ -69,7 +69,24 @@ def FE(data_1, data_2, data_3):
     for i in range(0,len(temp_arr_new)):
         RMS_values_new_3[i] = np.array(temp_arr_new[i], dtype= np.float32)
 
-    return RMS_values_new_1, RMS_values_new_2, RMS_values_new_3
+    return RMS_values_new_1, RMS_values_new_2, RMS_values_new_3, scaler
+def FE_perf(data_1, data_2, data_3):
+    RMS_values_1 = []
+    for i, recording in enumerate (data_1.items()):
+        my_data = recording[1]
+        RMS_values_1.append(np.sqrt(np.mean((np.array(my_data)**2))))
+    
+    RMS_values_2 =  []
+    for i, recording in enumerate (data_2.items()):
+        my_data = recording[1]
+        RMS_values_2.append(np.sqrt(np.mean((np.array(my_data)**2))))
+    
+    RMS_values_3 =  []
+    for i, recording in enumerate (data_3.items()):
+        my_data = recording[1]
+        RMS_values_3.append(np.sqrt(np.mean((np.array(my_data)**2))))
+
+    return RMS_values_1, RMS_values_2, RMS_values_3
 def data_prep_for_ML(channel1, channel2):
     keys = sorted(channel1.keys())
     data1_tensors = [torch.tensor(channel1[key]) for key in keys]
@@ -87,13 +104,18 @@ def data_prep_for_ML(channel1, channel2):
 
 train_x_no_norm, val_x_no_norm, test_x_no_norm, train_y_no_norm, val_y_no_norm, test_y_no_norm, train_o_no_norm, val_o_no_norm, test_o_no_norm, train_keys, val_keys, test_keys = data_splitting (windowing.Data_X, windowing.Data_Y, windowing.Data_O)
 
-train_x_norm, val_x_norm, test_x_norm = normalization (train_x_no_norm, val_x_no_norm, test_x_no_norm)
+train_x_norm, val_x_norm, test_x_norm= normalization (train_x_no_norm, val_x_no_norm, test_x_no_norm)
 train_y_norm, val_y_norm, test_y_norm = normalization (train_y_no_norm, val_y_no_norm, test_y_no_norm)
 train_o_norm, val_o_norm, test_o_norm = normalization (train_o_no_norm, val_o_no_norm, test_o_no_norm)
 
-train_z_norm, val_z_norm, test_z_norm  = FE(train_o_norm, val_o_norm, test_o_norm )  
+train_z_norm, val_z_norm, test_z_norm, scaler  = FE(train_o_norm, val_o_norm, test_o_norm )  
 
 data_train_xy = data_prep_for_ML(train_x_norm, train_y_norm); data_val_xy = data_prep_for_ML(val_x_norm, val_y_norm); data_test_xy = data_prep_for_ML(test_x_norm, test_y_norm)
 
 train_z_norm_l= list(train_z_norm.values()); val_z_norm_l = list(val_z_norm.values()); test_z_norm_l= list(test_z_norm.values())
 
+##### for peerfomance
+train_x_FE_norm_l, val_x_FE_norm_l, test_x_FE_norm_l= FE_perf(train_x_norm, val_x_norm, test_x_norm )  
+train_y_FE_norm_l, val_y_FE_norm_l, test_y_FE_norm_l= FE_perf(train_y_norm, val_y_norm, test_y_norm )  
+
+stop=1

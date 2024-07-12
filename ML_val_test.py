@@ -31,9 +31,9 @@ def ML_validating(model, val_inputs,val_labels):
         errors_val.append(((abs(ground_truth_value-predicted_value))/(ground_truth_value))*100)
         all_pred.append(predicted_value)
         all_gt.append(ground_truth_value)
-    plotting_results(errors_val,all_pred,all_gt,"Validation")
+    pm_val = plotting_results_val_db(errors_val,all_pred,all_gt,"Validation")
 
-    return model
+    return model, pm_val
 def ML_testing(model, test_inputs, test_labels):
     model.eval()
     test_loss = 0
@@ -67,34 +67,114 @@ def ML_testing(model, test_inputs, test_labels):
     #print(f"Test loss: {avg_test_loss}")
 
     printing_label = "Testing"
-    plotting_results(errors_test,all_pred,all_gt,printing_label)
-def plotting_results(error,predictions,gt,printing_label):
-    error_ready = [element for array in error for element in array.tolist()]
-    plt.figure(figsize=(10,5))
-    capped_data = np.clip(error_ready,a_min=None, a_max=100)
-    bins=np.append(np.linspace(0,100,10),np.inf)
-    hist, bin_edges = np.histogram(capped_data,bins=bins)
-    plt.hist(capped_data,bins=bin_edges,edgecolor="black")
-    plt.xlabel("Error [%]")    
-    plt.ylabel("Num of datapoints")
-    #plt.title(title)
-    #plt.show()
-    plt.savefig(f"{printing_label} histogram performance.png")
+    pm_test = plotting_results_test_db(errors_test,all_pred,all_gt,printing_label)
+    return pm_test
+def plotting_results_val_db(error,predictions,gt,printing_label):
+    real_ready = [element for array in gt for element in array.tolist()]
+    pred_ready = [element for array in predictions for element in array.tolist()]
+    error_ready= [element for array in error for element in array.tolist()]
 
-    real_ready = [value.item() for value in gt]
-    pred_ready = [value.item() for value in predictions]
-    #diff = [a-b for a,b in zip(real_ready,pred_ready)]
-    plt.figure(figsize=(10,5))
-    plt.plot(real_ready,label="orig")
-    plt.plot(pred_ready,label="pred")
-    #plt.plot(diff,label="diff")
-    plt.legend()
-    plt.xlabel("datapoint")
-    plt.ylabel("Noise RMS")
-    #plt.title(title)
-    #plt.show()
-    plt.savefig(f"{printing_label} raw performance.png")
-def generate_report(time, num_music, num_noise, noise_gains, SNRs, tf_types,model_type, training_loss):
+    real_ready_unscaled = splitting_normalization.scaler.inverse_transform(np.array(real_ready).reshape((len(real_ready),1)))
+    pred_ready_unscaled = splitting_normalization.scaler.inverse_transform(np.array(pred_ready).reshape((len(pred_ready),1)))
+
+    real_ready_g = [element for array in real_ready_unscaled for element in array.tolist()]
+    pred_ready_g = [element for array in pred_ready_unscaled for element in array.tolist()]
+
+
+    real_noise_db = 20*np.log10(np.array(real_ready_g)/splitting_normalization.val_x_FE_norm_l)
+    pred_noise_db= 20*np.log10(np.array(pred_ready_g)/splitting_normalization.val_x_FE_norm_l)   
+    diff_1 = real_noise_db -pred_noise_db
+
+    fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
+    ax1.plot(real_noise_db,label="Original")
+    ax1.plot(pred_noise_db,label="Prediction")
+    ax1.legend()
+    ax1.set_xlabel("Datapoint")
+    ax1.set_ylabel("Noise RMS (dB)")
+    #ax1.show() 
+
+    ax2.plot(diff_1,label="Difference between actual and predicted noise",color="black")
+    ax2.legend()
+    ax2.set_xlabel("Datapoint")
+    ax2.set_ylabel("Noise RMS (dB)")
+    #ax1.show()
+    plt.tight_layout()
+    plt.savefig(f"{printing_label} raw performance.png")    
+    ##############
+    SNR_real_db = 20*np.log10(np.array(splitting_normalization.val_y_FE_norm_l)/np.array(real_ready_g))
+    SNR_pred_db = 20*np.log10(np.array(splitting_normalization.val_y_FE_norm_l)/np.array(pred_ready_g))
+    diff = SNR_real_db - SNR_pred_db
+
+    fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
+    ax1.plot(SNR_real_db,label="Original")
+    ax1.plot(SNR_pred_db,label="Prediction")
+    ax1.legend()
+    ax1.set_xlabel("Datapoint")
+    ax1.set_ylabel("SNR (dB)")
+    #ax1.show() 
+
+    ax2.plot(diff,label="Difference between actual and predicted noise",color="black")
+    ax2.legend()
+    ax2.set_xlabel("Datapoint")
+    ax2.set_ylabel("SNR (dB)")
+    #ax1.show()
+    plt.tight_layout()
+    plt.savefig(f"{printing_label} raw performance2.png")  
+
+    return np.mean(diff_1)
+def plotting_results_test_db(error,predictions,gt,printing_label):
+    real_ready = [element for array in gt for element in array.tolist()]
+    pred_ready = [element for array in predictions for element in array.tolist()]
+    error_ready= [element for array in error for element in array.tolist()]
+
+    real_ready_unscaled = splitting_normalization.scaler.inverse_transform(np.array(real_ready).reshape((len(real_ready),1)))
+    pred_ready_unscaled = splitting_normalization.scaler.inverse_transform(np.array(pred_ready).reshape((len(pred_ready),1)))
+
+    real_ready_g = [element for array in real_ready_unscaled for element in array.tolist()]
+    pred_ready_g = [element for array in pred_ready_unscaled for element in array.tolist()]
+
+
+    real_noise_db = 20*np.log10(np.array(real_ready_g)/splitting_normalization.test_x_FE_norm_l)
+    pred_noise_db= 20*np.log10(np.array(pred_ready_g)/splitting_normalization.test_x_FE_norm_l)   
+    diff_1 = real_noise_db -pred_noise_db
+
+    fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
+    ax1.plot(real_noise_db,label="Original")
+    ax1.plot(pred_noise_db,label="Prediction")
+    ax1.legend()
+    ax1.set_xlabel("Datapoint")
+    ax1.set_ylabel("Noise RMS (dB)")
+    #ax1.show() 
+
+    ax2.plot(diff_1,label="Difference between actual and predicted noise",color="black")
+    ax2.legend()
+    ax2.set_xlabel("Datapoint")
+    ax2.set_ylabel("Noise RMS (dB)")
+    #ax1.show()
+    plt.tight_layout()
+    plt.savefig(f"{printing_label} raw performance.png")    
+    ##############
+    SNR_real_db = 20*np.log10(np.array(splitting_normalization.test_y_FE_norm_l)/np.array(real_ready_g))
+    SNR_pred_db = 20*np.log10(np.array(splitting_normalization.test_y_FE_norm_l)/np.array(pred_ready_g))
+    diff = SNR_real_db - SNR_pred_db
+
+    fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
+    ax1.plot(SNR_real_db,label="Original")
+    ax1.plot(SNR_pred_db,label="Prediction")
+    ax1.legend()
+    ax1.set_xlabel("Datapoint")
+    ax1.set_ylabel("SNR (dB)")
+    #ax1.show() 
+
+    ax2.plot(diff,label="Difference between actual and predicted noise",color="black")
+    ax2.legend()
+    ax2.set_xlabel("Datapoint")
+    ax2.set_ylabel("SNR (dB)")
+    #ax1.show()
+    plt.tight_layout()
+    plt.savefig(f"{printing_label} raw performance2.png")  
+    return np.mean(diff_1)
+def generate_report(time, num_music, num_noise, noise_gains, SNRs, tf_types,model_type, training_loss,pm_train,pm_val,pm_test):
     with open ("Results report","w") as file:
         file.write(f"time: {time}\n")
         file.write(f"num_music: {num_music}\n")
@@ -104,12 +184,15 @@ def generate_report(time, num_music, num_noise, noise_gains, SNRs, tf_types,mode
         file.write(f"tf_types: {tf_types}\n")
         file.write(f"model type: {model_type}\n")
         file.write(f"training loss: {training_loss}\n")
+        file.write(f"pm-train: {pm_train}\n")
+        file.write(f"pm-val: {pm_val}\n")     
+        file.write(f"pm-test: {pm_test}\n")    
     return 
 ### import model
 device = "cuda"
-ML_validating(ML_train.model, splitting_normalization.data_val_xy, splitting_normalization.val_z_norm_l)
-ML_testing(ML_train.model, splitting_normalization.data_test_xy, splitting_normalization.test_z_norm_l)
+model, pm_val=ML_validating(ML_train.model, splitting_normalization.data_val_xy, splitting_normalization.val_z_norm_l)
+pm_test=ML_testing(ML_train.model, splitting_normalization.data_test_xy, splitting_normalization.test_z_norm_l)
 
 end_time = time.time()
 full_time = end_time-user_inputs.start_time
-generate_report(full_time,user_inputs.num_music_files,user_inputs.num_noise_files, user_inputs.noise_gains, user_inputs.SNRs, user_inputs.tf_types, user_inputs.ML_type,ML_train.train_loss_values[:-1])
+generate_report(full_time,user_inputs.num_music_files,user_inputs.num_noise_files, user_inputs.noise_gains, user_inputs.SNRs, user_inputs.tf_types, user_inputs.ML_type,ML_train.train_loss_values[:-1],ML_train.pm_training,pm_val,pm_test)
