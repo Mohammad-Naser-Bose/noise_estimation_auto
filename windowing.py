@@ -22,14 +22,17 @@ def windowing(signal):
             master_c+=1
     return windowed_data
 
-def move_dict_to_gpu(data_dict,device="cuda"):
-    gpu_data_dict = {}
-    for key, value in data_dict.items():
-        tensor_value = torch.tensor(value,dtype=torch.float32).to(device)
-        gpu_data_dict[key]=tensor_value
-    return gpu_data_dict
+# def move_dict_to_gpu(data_dict,device="cuda"):
+#     gpu_data_dict = {}
+#     for key, value in data_dict.items():
+#         tensor_value = torch.tensor(value,dtype=torch.float32).to(device)
+#         gpu_data_dict[key]=tensor_value
+#     return gpu_data_dict
 
-Data_Y=windowing(move_dict_to_gpu(reference_preparation.Data_L))
+# Data_Y=windowing(move_dict_to_gpu(reference_preparation.Data_L))
+# Data_X=windowing(move_dict_to_gpu(mixing.Data_K))
+# Data_O=windowing(move_dict_to_gpu(mixing.Data_J))
+
+Data_Y=windowing(reference_preparation.Data_L)
 Data_X=windowing(mixing.Data_K)
 Data_O=windowing(mixing.Data_J)
-
