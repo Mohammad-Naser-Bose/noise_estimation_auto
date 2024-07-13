@@ -14,3 +14,14 @@ import scipy.signal as signal
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import math
 import time
+
+
+
+cuda_available =torch.cude.is_available
+print(cuda_available)
+
+try:
+    x=torch.tensor([1,2,3]).to("cuda")
+    print("success")
+except Exception as e:
+    print("bad news")
