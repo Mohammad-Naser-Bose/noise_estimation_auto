@@ -17,7 +17,7 @@ import time
 
 
 
-cuda_available =torch.cude.is_available
+cuda_available =torch.cuda.is_available
 print(cuda_available)
 
 try:
