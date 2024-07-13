@@ -184,9 +184,18 @@ def run_ML(train_inputs,train_labels):
     plotting_performance(train_loss_values,"Training")
     #plotting_results(error,predictions,gt, "Training")
     pm_training = plotting_db(error,predictions,gt, "Training")
-
+    save_results(model, train_loss_values, error, predictions,gt)
     return model, train_loss_values, pm_training
-
+def save_results(model, train_loss_values, error, predictions,gt):
+    with open("train_loss_values.pkl","wb") as file:
+        pickle.dump(train_loss_values,file)
+    with open("error.pkl","wb") as file:
+        pickle.dump(error,file)
+    with open("predictions.pkl","wb") as file:
+        pickle.dump(predictions,file)
+    with open("gt.pkl","wb") as file:
+        pickle.dump(gt,file)
+    return
 
 
 window_len_sample_downsampled = user_inputs.window_len_sample_downsampled
@@ -198,7 +207,3 @@ if ML_type == "CNN_LSTM":
     my_ML_model = CNN_LSTM()             
 device ="cuda"
 model,train_loss_values, pm_training = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)
-
-with open("Model.pkl","wb") as file:
-    pickle.dump(model,file) 
-stop=1

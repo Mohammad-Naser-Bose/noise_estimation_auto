@@ -27,14 +27,12 @@ def data_splitting(x, y, z):
 
     return train_x, val_x, test_x, train_y, val_y, test_y, train_z, val_z, test_z, train_keys, val_keys, test_keys
 def normalization (train_no_norm, val_no_norm, test_no_norm):
-
     all_windows_training = np.concatenate ([np.array(value) for value in train_no_norm.values()])
     scaler = StandardScaler()
     scaler.fit(all_windows_training.reshape(-1,1))
     normalized_training_windows = {key:scaler.transform(np.array(value).reshape(-1,1)).flatten().tolist() for key, value in train_no_norm.items()}
     normalized_validation_windows = {key:scaler.transform(np.array(value).reshape(-1,1)).flatten().tolist() for key, value in val_no_norm.items()}
     normalized_testing_windows = {key:scaler.transform(np.array(value).reshape(-1,1)).flatten().tolist() for key, value in test_no_norm.items()}
-
     return normalized_training_windows, normalized_validation_windows, normalized_testing_windows
 def FE(data_1, data_2, data_3):
     RMS_values_1 = {}
@@ -107,11 +105,11 @@ train_x_no_norm, val_x_no_norm, test_x_no_norm, train_y_no_norm, val_y_no_norm, 
 train_x_norm, val_x_norm, test_x_norm= normalization (train_x_no_norm, val_x_no_norm, test_x_no_norm)
 train_y_norm, val_y_norm, test_y_norm = normalization (train_y_no_norm, val_y_no_norm, test_y_no_norm)
 train_o_norm, val_o_norm, test_o_norm = normalization (train_o_no_norm, val_o_no_norm, test_o_no_norm)
-
+print("#########")
 train_z_norm, val_z_norm, test_z_norm, scaler  = FE(train_o_norm, val_o_norm, test_o_norm )  
-
+print("#########")
 data_train_xy = data_prep_for_ML(train_x_norm, train_y_norm); data_val_xy = data_prep_for_ML(val_x_norm, val_y_norm); data_test_xy = data_prep_for_ML(test_x_norm, test_y_norm)
-
+print("#########")
 train_z_norm_l= list(train_z_norm.values()); val_z_norm_l = list(val_z_norm.values()); test_z_norm_l= list(test_z_norm.values())
 
 ##### for peerfomance

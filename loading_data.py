@@ -4,10 +4,10 @@ import user_inputs
 def loading_data(dir,label):
     if label=="noise":
         num_files = user_inputs.num_noise_files
-        cuttoff_samples = user_inputs.window_len_sample
+        cuttoff_samples = int(user_inputs.window_len_sample*5)
     else:
         num_files = user_inputs.num_music_files
-        cuttoff_samples = 3969000 # 90s
+        cuttoff_samples = 1323000 # 30s
     
     files = os.listdir(dir)[:num_files] 
 
@@ -16,12 +16,8 @@ def loading_data(dir,label):
         audio_path=os.path.join(dir,file)
         audio_data, sample_rate = librosa.load(audio_path,sr=None)
 
-        if user_inputs.one_noise_window_flag==True:
-            if cuttoff_samples:
-                audio_data = audio_data[:cuttoff_samples]
-        if user_inputs.shortest_music_flag==True:
-            if cuttoff_samples:
-                audio_data = audio_data[:cuttoff_samples]
+
+        audio_data = audio_data[:cuttoff_samples]
 
         full_recordings[i] = audio_data 
     

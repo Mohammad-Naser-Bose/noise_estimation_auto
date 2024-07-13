@@ -19,3 +19,5 @@ def mixing(audio, noise):
 
 Data_J = concatenating_noise(applying_gain_music.Data_I, permutation_noise_music.Data_H)
 Data_K = mixing(applying_gain_music.Data_I, Data_J)
+
+stop=1

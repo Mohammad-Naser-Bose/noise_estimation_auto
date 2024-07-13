@@ -7,8 +7,11 @@ import resampling
 def apply_music_gain(audio_full):
     factors_list = []
     for mod_f in factors:
-        [factors_list.append(val)  for n in range(0, user_inputs.num_noise_files*len(user_inputs.noise_gains)) for nn in range (0, user_inputs.num_tfs) for val in mod_f]
-              
+        if user_inputs.use_tf==True:
+            [factors_list.append(val)  for n in range(0, user_inputs.num_noise_files*len(user_inputs.noise_gains)) for nn in range (0, user_inputs.num_tfs) for val in mod_f]
+        else:
+            [factors_list.append(val)  for n in range(0, user_inputs.num_noise_files*len(user_inputs.noise_gains)) for val in mod_f]
+
     modified_music = {}
     for key, value in audio_full.items():
         modified_music[key] = audio_full[key]* factors_list[key]
@@ -57,17 +60,17 @@ for i,value in all_music.items():
 stacked_music = np.stack(list(all_music_new.values()),axis=0)
 max_music_avg= stacked_music[np.where(np.max(np.mean(stacked_music**2,axis=1)))][0]
 
-### Actual plotting
-repeat_factor = int(np.ceil(len(max_music_avg)/len(min_noise_avg)))
-noise_concat = np.tile(min_noise_avg, repeat_factor)[:len(max_music_avg)]
-x_axis_sample = [i for i in range(0, len(noise_concat))] 
-x_axis_second = [num/user_inputs.downsampling_new_sr for num in x_axis_sample]
-plt.figure(figsize=(10,6))
-plt.plot(x_axis_second, max_music_avg, label=f"Max Music record")
-plt.plot(x_axis_second, noise_concat, label="Min Noise record",alpha=0.5)
-plt.legend(fontsize=14)    
-plt.tight_layout()
-plt.xlabel("Second",fontsize=14)
-plt.ylabel("V",fontsize=14)
-plt.savefig("Worst_SNR.png",bbox_inches="tight",pad_inches=0.1)
-stop =1
+# ### Actual plotting
+# repeat_factor = int(np.ceil(len(max_music_avg)/len(min_noise_avg)))
+# noise_concat = np.tile(min_noise_avg, repeat_factor)[:len(max_music_avg)]
+# x_axis_sample = [i for i in range(0, len(noise_concat))] 
+# x_axis_second = [num/user_inputs.downsampling_new_sr for num in x_axis_sample]
+# plt.figure(figsize=(10,6))
+# plt.plot(x_axis_second, max_music_avg, label=f"Max Music record")
+# plt.plot(x_axis_second, noise_concat, label="Min Noise record",alpha=0.5)
+# plt.legend(fontsize=14)    
+# plt.tight_layout()
+# plt.xlabel("Second",fontsize=14)
+# plt.ylabel("V",fontsize=14)
+# plt.savefig("Worst_SNR.png",bbox_inches="tight",pad_inches=0.1)
+# stop =1
