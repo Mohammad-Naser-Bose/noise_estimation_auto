@@ -16,7 +16,6 @@ def loading_data(dir,label):
         audio_path=os.path.join(dir,file)
         audio_data, sample_rate = librosa.load(audio_path,sr=None)
 
-
         audio_data = audio_data[:cuttoff_samples]
 
         full_recordings[i] = audio_data 
