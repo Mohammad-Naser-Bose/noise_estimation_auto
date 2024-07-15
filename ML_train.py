@@ -141,7 +141,7 @@ def run_ML(train_inputs,train_labels):
     dataloader = DataLoader(dataset,batch_size=batch_size, shuffle=True)
     reg_criterion = nn.MSELoss()
     model = my_ML_model 
-    model = model.to(device)
+    #model = model.to(device)
 
     optimizer = optim.Adam(model.parameters(),lr=0.001)#,weight_decay=0.000001)
     #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min",factor=0.1, patience=5)
@@ -160,8 +160,8 @@ def run_ML(train_inputs,train_labels):
         
 
         for batch_idx, (inputs, targets) in enumerate(dataloader):
-            inputs = inputs.to(device)
-            targets = targets.to(device)
+            #inputs = inputs.to(device)
+            #targets = targets.to(device)
             optimizer.zero_grad()
             inputs = inputs.to(torch.float32)
             outputs = model(inputs.squeeze(1))
@@ -219,8 +219,8 @@ num_epochs = user_inputs.num_epochs
 
 if ML_type == "CNN_LSTM":
     my_ML_model = CNN_LSTM()             
-device ="cuda"
-weights = torch.ones(len(splitting_normalization.train_z_norm_l)).to(device)
+#device ="cuda"
+weights = torch.ones(len(splitting_normalization.train_z_norm_l))#.to(device)
 for i in range(len(splitting_normalization.train_z_norm_l)):
     weights[i]*=1
     # if splitting_normalization.train_z_norm_l[i][0]>.33: #or splitting_normalization.train_z_norm_l[i][0]<.05:
