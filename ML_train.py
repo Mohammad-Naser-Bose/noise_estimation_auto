@@ -6,30 +6,37 @@ import splitting_normalization
 class CNN_LSTM(nn.Module):
     def __init__(self):
         super(CNN_LSTM, self).__init__()
-        self.conv1 = nn.Conv1d(in_channels=2, out_channels=16, kernel_size=3, stride=3, padding=1, dilation=1)
-        self.conv2 = nn.Conv1d(in_channels=16, out_channels=32, kernel_size=3, stride=3, padding=1, dilation=1)
-        self.conv3 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3, stride=3, padding=1, dilation=1)
-        self.dropout1 = nn.Dropout(0.35)
+        self.conv1 = nn.Conv1d(in_channels=2, out_channels=8, kernel_size=3, stride=3, padding=1, dilation=1)
+        self.conv2 = nn.Conv1d(in_channels=8, out_channels=32, kernel_size=3, stride=3, padding=1, dilation=1)
+        self.conv3 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3, stride=3, padding=1, dilation=1)    
+        self.bn1 = nn.BatchNorm1d(8)
+        self.bn2 = nn.BatchNorm1d(32)
+        self.bn3 = nn.BatchNorm1d(64)
+        
+        self.bn_fc1 = nn.BatchNorm1d(256)
+        self.bn_fc2 = nn.BatchNorm1d(64)
+
+        self.dropout1 = nn.Dropout(0.3)
         self.pool = nn.MaxPool1d(kernel_size=2, stride=2, padding=0)
         self.relu = nn.ReLU()
         self.flattened_size= self._get_flattened_size()
-        self.lstm = nn.LSTM(input_size=64, hidden_size=32, num_layers=2,batch_first=True)
-        self.fc1 = nn.Linear(416,128)
-        self.fc2 = nn.Linear(128,32) 
-        self.fc3 = nn.Linear(32,1)        
+        self.lstm = nn.LSTM(input_size=64, hidden_size=64, num_layers=1,batch_first=True)
+        self.fc1 = nn.Linear(832,256)
+        self.fc2 = nn.Linear(256,64) 
+        self.fc3 = nn.Linear(64,1)        
         
     def _get_flattened_size(self):
         x = torch.zeros(1,2,window_len_sample_downsampled) # one sample regardless the batch size, num channels, num timepoints
-        x = self.pool(self.relu(self.conv1(x)))
-        x = self.pool(self.relu(self.conv2(x)))
-        x = self.pool(self.relu(self.conv3(x)))
+        x = self.pool(self.relu(self.bn1(self.conv1(x))))
+        x = self.pool(self.relu(self.bn2(self.conv2(x))))
+        x = self.pool(self.relu(self.bn3(self.conv3(x))))  
         return x.numel()
 
     def forward(self,x):
-        x = self.pool(self.relu(self.conv1(x)))
-        x = self.pool(self.relu(self.conv2(x)))
-        x = self.pool(self.relu(self.conv3(x)))
-        x = self.dropout1(x)
+        x = self.pool(self.relu(self.bn1(self.conv1(x))))
+        x = self.pool(self.relu(self.bn2(self.conv2(x))))
+        x = self.pool(self.relu(self.bn3(self.conv3(x))))    
+        #x = self.dropout1(x)
 
         x_dim = x.dim()
         if x_dim ==3:
@@ -38,15 +45,15 @@ class CNN_LSTM(nn.Module):
             x=x.permute(1,0)
 
         x,_ = self.lstm(x)
-        #x = self.dropout1(x)
+
         if x_dim ==3:
             vvv=x.size(0)
             x_reshaped = x.reshape(vvv,-1)
         elif x_dim ==2:
             x_reshaped=x.flatten()
-        #x_reshaped = self.dropout1(x_reshaped)
-        x = self.relu(self.fc1(x_reshaped))
-        x = self.relu(self.fc2(x))
+
+        x = self.relu(self.bn_fc1(self.fc1(x_reshaped)))
+        x = self.relu(self.bn_fc2(self.fc2(x)))
         x = self.fc3(x)
         return x
 class CustomDataset(Dataset):
@@ -72,53 +79,59 @@ def plotting_db(error,predictions,gt,printing_label):
     pred_ready = [element for array in predictions for element in array.tolist()]
     error_ready= [element for array in error for element in array.tolist()]
 
-    real_ready_unscaled = splitting_normalization.scaler.inverse_transform(np.array(real_ready).reshape((len(real_ready),1)))
-    pred_ready_unscaled = splitting_normalization.scaler.inverse_transform(np.array(pred_ready).reshape((len(pred_ready),1)))
+    # real_ready_unscaled = splitting_normalization.scaler.inverse_transform(np.array(real_ready).reshape((len(real_ready),1)))
+    # pred_ready_unscaled = splitting_normalization.scaler.inverse_transform(np.array(pred_ready).reshape((len(pred_ready),1)))
 
-    real_ready_g = [element for array in real_ready_unscaled for element in array.tolist()]
-    pred_ready_g = [element for array in pred_ready_unscaled for element in array.tolist()]
+    # real_ready_g = [element for array in real_ready_unscaled for element in array.tolist()]
+    # pred_ready_g = [element for array in pred_ready_unscaled for element in array.tolist()]
 
 
-    real_noise_db = 20*np.log10(np.array(real_ready_g)/splitting_normalization.train_x_FE_norm_l)
-    pred_noise_db= 20*np.log10(np.array(pred_ready_g)/splitting_normalization.train_x_FE_norm_l)   
+    real_noise_db = 20*np.log10(np.array(real_ready)/1)
+    pred_noise_db= 20*np.log10(np.array(pred_ready)/1)   
     diff_1 = real_noise_db -pred_noise_db
 
     fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
-    ax1.plot(real_noise_db,label="Original")
-    ax1.plot(pred_noise_db,label="Prediction")
+    ax1.plot(real_noise_db[:100],label="Original")
+    ax1.plot(pred_noise_db[:100],label="Prediction")
     ax1.legend()
     ax1.set_xlabel("Datapoint")
     ax1.set_ylabel("Noise RMS (dB)")
+    ax2.grid(True)
     #ax1.show() 
 
-    ax2.plot(diff_1,label="Difference between actual and predicted noise",color="black")
+    ax2.plot(np.abs(diff_1[:100]),label="Difference between actual and predicted noise",color="black")
+    mean = np.mean(np.abs(diff_1[:100]))
+    ax2.axhline(y=mean,color="orange", linestyle="--", label="Avg")
     ax2.legend()
     ax2.set_xlabel("Datapoint")
-    ax2.set_ylabel("Noise RMS (dB)")
+    ax2.set_ylabel("|Noise RMS (dB)|")
+    ax2.grid(True)
     #ax1.show()
     plt.tight_layout()
     plt.savefig(f"{printing_label} raw performance.png")    
 
     ##############
-    SNR_real_db = 20*np.log10(np.array(splitting_normalization.train_y_FE_norm_l)/np.array(real_ready_g))
-    SNR_pred_db = 20*np.log10(np.array(splitting_normalization.train_y_FE_norm_l)/np.array(pred_ready_g))
-    diff = SNR_real_db - SNR_pred_db
+    # SNR_real_db = 20*np.log10(np.array(splitting_normalization.train_y_FE_norm_l)/1)
+    # SNR_pred_db = 20*np.log10(np.array(splitting_normalization.train_y_FE_norm_l)/1)
+    # diff = SNR_real_db - SNR_pred_db
 
-    fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
-    ax1.plot(SNR_real_db,label="Original")
-    ax1.plot(SNR_pred_db,label="Prediction")
-    ax1.legend()
-    ax1.set_xlabel("Datapoint")
-    ax1.set_ylabel("SNR (dB)")
-    #ax1.show() 
+    # fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
+    # ax1.plot(SNR_real_db[:100],label="Original")
+    # ax1.plot(SNR_pred_db[:100],label="Prediction")
+    # ax1.legend()
+    # ax1.set_xlabel("Datapoint")
+    # ax1.set_ylabel("SNR (dB)")
+    # ax1.grid(True)
+    # #ax1.show() 
 
-    ax2.plot(diff,label="Difference between actual and predicted noise",color="black")
-    ax2.legend()
-    ax2.set_xlabel("Datapoint")
-    ax2.set_ylabel("SNR (dB)")
-    #ax1.show()
-    plt.tight_layout()
-    plt.savefig(f"{printing_label} raw performance2.png")  
+    # ax2.plot(diff[:1000],label="Difference between actual and predicted noise",color="black")
+    # ax2.legend()
+    # ax2.set_xlabel("Datapoint")
+    # ax2.set_ylabel("SNR (dB)")
+    # #ax1.show()
+    # plt.tight_layout()
+    # ax2.grid(True)
+    # plt.savefig(f"{printing_label} raw performance2.png")  
 
 
     
@@ -130,7 +143,7 @@ def run_ML(train_inputs,train_labels):
     model = my_ML_model 
     model = model.to(device)
 
-    optimizer = optim.Adam(model.parameters(),lr=0.001)
+    optimizer = optim.Adam(model.parameters(),lr=0.001)#,weight_decay=0.000001)
     #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min",factor=0.1, patience=5)
 
     train_loss_values = []
@@ -154,11 +167,12 @@ def run_ML(train_inputs,train_labels):
             outputs = model(inputs.squeeze(1))
 
             loss_value  = reg_criterion(outputs, targets)
-            loss_value.backward()
+            weighted_loss=(loss_value*weights).mean()
+            weighted_loss.backward()
             optimizer.step()
-            running_train_loss += loss_value.item()
+            running_train_loss += weighted_loss.item()
 
-            if master_c % 10 ==0:
+            if master_c % 30 ==0:
                 print("real:", targets.detach().cpu().numpy().flatten())
                 print("pred:", outputs.detach().cpu().numpy().flatten())
                 print("-------")
@@ -171,7 +185,7 @@ def run_ML(train_inputs,train_labels):
 
                 predictions.append(predicted_values)
                 gt.append(ground_truth_values)
-        print("loss is:", loss_value)
+        print("loss is:", weighted_loss)
         
 
         avg_train_loss = running_train_loss / num_train_batches
@@ -206,4 +220,9 @@ num_epochs = user_inputs.num_epochs
 if ML_type == "CNN_LSTM":
     my_ML_model = CNN_LSTM()             
 device ="cuda"
+weights = torch.ones(len(splitting_normalization.train_z_norm_l)).to(device)
+for i in range(len(splitting_normalization.train_z_norm_l)):
+    weights[i]*=1
+    # if splitting_normalization.train_z_norm_l[i][0]>.33: #or splitting_normalization.train_z_norm_l[i][0]<.05:
+    #     weights[i]*=2
 model,train_loss_values, pm_training = run_ML(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm_l)

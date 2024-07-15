@@ -1,6 +1,8 @@
 from imports import *
 import permutation_noise_music
 import applying_gain_music
+from decimal import Decimal, getcontext
+getcontext().prec = 15
 
 
 def concatenating_noise(music, noise):

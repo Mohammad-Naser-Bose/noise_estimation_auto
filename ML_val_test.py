@@ -81,19 +81,19 @@ def plotting_results_val_db(error,predictions,gt,printing_label):
     pred_ready_g = [element for array in pred_ready_unscaled for element in array.tolist()]
 
 
-    real_noise_db = 20*np.log10(np.array(real_ready_g)/splitting_normalization.val_x_FE_norm_l)
-    pred_noise_db= 20*np.log10(np.array(pred_ready_g)/splitting_normalization.val_x_FE_norm_l)   
+    real_noise_db = 20*np.log10(np.array(real_ready_g)/1)
+    pred_noise_db= 20*np.log10(np.array(pred_ready_g)/1)   
     diff_1 = real_noise_db -pred_noise_db
 
     fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
-    ax1.plot(real_noise_db,label="Original")
-    ax1.plot(pred_noise_db,label="Prediction")
+    ax1.plot(real_noise_db[:100],label="Original")
+    ax1.plot(pred_noise_db[:100],label="Prediction")
     ax1.legend()
     ax1.set_xlabel("Datapoint")
     ax1.set_ylabel("Noise RMS (dB)")
     #ax1.show() 
 
-    ax2.plot(diff_1,label="Difference between actual and predicted noise",color="black")
+    ax2.plot(diff_1[:100],label="Difference between actual and predicted noise",color="black")
     ax2.legend()
     ax2.set_xlabel("Datapoint")
     ax2.set_ylabel("Noise RMS (dB)")
@@ -101,19 +101,19 @@ def plotting_results_val_db(error,predictions,gt,printing_label):
     plt.tight_layout()
     plt.savefig(f"{printing_label} raw performance.png")    
     ##############
-    SNR_real_db = 20*np.log10(np.array(splitting_normalization.val_y_FE_norm_l)/np.array(real_ready_g))
-    SNR_pred_db = 20*np.log10(np.array(splitting_normalization.val_y_FE_norm_l)/np.array(pred_ready_g))
+    SNR_real_db = 20*np.log10(np.array(splitting_normalization.val_y_FE_norm_l)/1)
+    SNR_pred_db = 20*np.log10(np.array(splitting_normalization.val_y_FE_norm_l)/1)
     diff = SNR_real_db - SNR_pred_db
 
     fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
-    ax1.plot(SNR_real_db,label="Original")
-    ax1.plot(SNR_pred_db,label="Prediction")
+    ax1.plot(SNR_real_db[:100],label="Original")
+    ax1.plot(SNR_pred_db[:100],label="Prediction")
     ax1.legend()
     ax1.set_xlabel("Datapoint")
     ax1.set_ylabel("SNR (dB)")
     #ax1.show() 
 
-    ax2.plot(diff,label="Difference between actual and predicted noise",color="black")
+    ax2.plot(diff[:100],label="Difference between actual and predicted noise",color="black")
     ax2.legend()
     ax2.set_xlabel("Datapoint")
     ax2.set_ylabel("SNR (dB)")
@@ -134,19 +134,19 @@ def plotting_results_test_db(error,predictions,gt,printing_label):
     pred_ready_g = [element for array in pred_ready_unscaled for element in array.tolist()]
 
 
-    real_noise_db = 20*np.log10(np.array(real_ready_g)/splitting_normalization.test_x_FE_norm_l)
-    pred_noise_db= 20*np.log10(np.array(pred_ready_g)/splitting_normalization.test_x_FE_norm_l)   
+    real_noise_db = 20*np.log10(np.array(real_ready_g)/1)
+    pred_noise_db= 20*np.log10(np.array(pred_ready_g)/1)   
     diff_1 = real_noise_db -pred_noise_db
 
     fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
-    ax1.plot(real_noise_db,label="Original")
-    ax1.plot(pred_noise_db,label="Prediction")
+    ax1.plot(real_noise_db[:100],label="Original")
+    ax1.plot(pred_noise_db[:100],label="Prediction")
     ax1.legend()
     ax1.set_xlabel("Datapoint")
     ax1.set_ylabel("Noise RMS (dB)")
     #ax1.show() 
 
-    ax2.plot(diff_1,label="Difference between actual and predicted noise",color="black")
+    ax2.plot(diff_1[:100],label="Difference between actual and predicted noise",color="black")
     ax2.legend()
     ax2.set_xlabel("Datapoint")
     ax2.set_ylabel("Noise RMS (dB)")
@@ -154,8 +154,8 @@ def plotting_results_test_db(error,predictions,gt,printing_label):
     plt.tight_layout()
     plt.savefig(f"{printing_label} raw performance.png")    
     ##############
-    SNR_real_db = 20*np.log10(np.array(splitting_normalization.test_y_FE_norm_l)/np.array(real_ready_g))
-    SNR_pred_db = 20*np.log10(np.array(splitting_normalization.test_y_FE_norm_l)/np.array(pred_ready_g))
+    SNR_real_db = 20*np.log10(np.array(splitting_normalization.test_y_FE_norm_l)/1)
+    SNR_pred_db = 20*np.log10(np.array(splitting_normalization.test_y_FE_norm_l)/1)
     diff = SNR_real_db - SNR_pred_db
 
     fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))

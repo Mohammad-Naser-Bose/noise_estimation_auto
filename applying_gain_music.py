@@ -8,10 +8,10 @@ def apply_music_gain(audio_full):
     factors_list = []
     for mod_f in factors:
         if user_inputs.use_tf==True:
-            [factors_list.append(val)  for n in range(0, user_inputs.num_noise_files*len(user_inputs.noise_gains)) for nn in range (0, user_inputs.num_tfs) for val in mod_f]
+            raise("fixxxxxxxxxxx")#[factors_list.append(val) for nn in range (0, user_inputs.num_tfs) for val in mod_f]
         else:
-            [factors_list.append(val)  for n in range(0, user_inputs.num_noise_files*len(user_inputs.noise_gains)) for val in mod_f]
-
+            [factors_list.append(val) for val in mod_f]
+   
     modified_music = {}
     for key, value in audio_full.items():
         modified_music[key] = audio_full[key]* factors_list[key]
@@ -19,14 +19,16 @@ def apply_music_gain(audio_full):
 def find_ratios(music, noise):
     all_noise=[np.array(value) for value in noise.values()]
     noise = np.stack(all_noise,axis=0)
-    noise_avg =np.mean(noise,axis=0)
+    noise_power=[]
+    for i in noise:
+        noise_power.append(np.mean(i**2))
 
-    noise_power = np.mean(noise_avg**2)
     music_power = []
     snrs_as_imported = []
     for i,record in music.items():
         music_power.append(np.mean(record**2))
-        snrs_as_imported.append(music_power[i]/noise_power)
+        snrs_as_imported.append(music_power[i]/noise_power[i])
+        
     factors_ready = []
     for snr in user_inputs.SNRs:
         fac=[]
@@ -38,7 +40,7 @@ def find_ratios(music, noise):
 
 
 
-factors=find_ratios(resampling.Data_E,resampling.Data_B)
+factors=find_ratios(permutation_noise_music.Data_G,permutation_noise_music.Data_H)
 Data_I = apply_music_gain(permutation_noise_music.Data_G)
 
 
