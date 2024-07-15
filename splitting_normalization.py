@@ -4,7 +4,7 @@ import user_inputs
 
 
 def data_splitting(x, y, z):
-    keys = list(x.keys())
+    keys = [i for i in range(0,len(x))]
     random.shuffle(keys)
     train_end = int(user_inputs.train_ratio * len(keys))
     val_end = train_end + int(user_inputs.val_ratio * len(keys))
@@ -13,64 +13,46 @@ def data_splitting(x, y, z):
     val_keys = keys[train_end:val_end]
     test_keys = keys[val_end:]
 
-    train_x = {key: x[key] for key in train_keys}
-    val_x = {key: x[key] for key in val_keys}
-    test_x = {key: x[key] for key in test_keys}
+    train_x = np.array([x[key] for key in train_keys])
+    val_x = np.array([x[key] for key in val_keys])
+    test_x = np.array([x[key] for key in test_keys])
 
-    train_y = {key: y[key] for key in train_keys}
-    val_y = {key: y[key] for key in val_keys}
-    test_y = {key: y[key] for key in test_keys}
+    train_y = np.array([y[key] for key in train_keys])
+    val_y = np.array([y[key] for key in val_keys])
+    test_y = np.array([y[key] for key in test_keys])
 
-    train_z = {key: z[key] for key in train_keys}
-    val_z= {key: z[key] for key in val_keys}
-    test_z= {key: z[key] for key in test_keys}
+    train_z = np.array([z[key] for key in train_keys])
+    val_z = np.array([z[key] for key in val_keys])
+    test_z = np.array([z[key] for key in test_keys])
 
     return train_x, val_x, test_x, train_y, val_y, test_y, train_z, val_z, test_z, train_keys, val_keys, test_keys
 def normalization (train_no_norm, val_no_norm, test_no_norm):
-    all_windows_training = np.concatenate ([np.array(value) for value in train_no_norm.values()])
     scaler = StandardScaler()
-    scaler.fit(all_windows_training.reshape(-1,1))
-    normalized_training_windows = {key:scaler.transform(np.array(value).reshape(-1,1)).flatten().tolist() for key, value in train_no_norm.items()}
-    normalized_validation_windows = {key:scaler.transform(np.array(value).reshape(-1,1)).flatten().tolist() for key, value in val_no_norm.items()}
-    normalized_testing_windows = {key:scaler.transform(np.array(value).reshape(-1,1)).flatten().tolist() for key, value in test_no_norm.items()}
+    scaler.fit(train_no_norm)
+    normalized_training_windows = np.array(scaler.transform(train_no_norm))
+    normalized_validation_windows = np.array(scaler.transform(val_no_norm))
+    normalized_testing_windows = np.array(scaler.transform(test_no_norm))
     return normalized_training_windows, normalized_validation_windows, normalized_testing_windows
 def FE(data_1, data_2, data_3):
-    RMS_values_1 = {}
-    for i, recording in enumerate (data_1.items()):
-        my_data = recording[1]
-        RMS_values_1 [i] = np.sqrt(np.mean((np.array(my_data)**2)))
-    temp_arr = np.hstack(list(RMS_values_1.values())).reshape(-1, 1)
-    # scaler = MinMaxScaler(feature_range=(-1, 1))
-    # scaler.fit(temp_arr)
-    # temp_arr_new = scaler.transform(temp_arr)
-    temp_arr_new=temp_arr
-    RMS_values_new_1 = {}
-    for i in range(0,len(temp_arr_new)):
-        RMS_values_new_1[i] = np.array(temp_arr_new[i], dtype= np.float32)
+    RMS_values_1 = np.zeros(shape=(len(data_1)))
+    master_c=0
+    for recording in data_1:
+        RMS_values_1[master_c]=np.sqrt(np.mean(recording**2))
+        master_c+=1
 
-    RMS_values_2 = {}
-    for i, recording in enumerate (data_2.items()):
-        my_data = recording[1]
-        RMS_values_2 [i] = np.sqrt(np.mean((np.array(my_data)**2)))
-    temp_arr = np.hstack(list(RMS_values_2.values())).reshape(-1, 1)
-    # temp_arr_new =scaler.transform(temp_arr)
-    temp_arr_new=temp_arr
-    RMS_values_new_2 = {}
-    for i in range(0,len(temp_arr_new)):
-        RMS_values_new_2[i] = np.array(temp_arr_new[i], dtype= np.float32)
+    RMS_values_2 = np.zeros(shape=(len(data_2)))
+    master_c=0
+    for recording in data_2:
+        RMS_values_2[master_c]=np.sqrt(np.mean(recording**2))
+        master_c+=1
 
-    RMS_values_3 = {}
-    for i, recording in enumerate (data_3.items()):
-        my_data = recording[1]
-        RMS_values_3 [i] = np.sqrt(np.mean((np.array(my_data)**2)))
-    temp_arr = np.hstack(list(RMS_values_3.values())).reshape(-1, 1)
-    # temp_arr_new =scaler.transform(temp_arr)
-    temp_arr_new=temp_arr
-    RMS_values_new_3 = {}
-    for i in range(0,len(temp_arr_new)):
-        RMS_values_new_3[i] = np.array(temp_arr_new[i], dtype= np.float32)
+    RMS_values_3 = np.zeros(shape=(len(data_3)))
+    master_c=0
+    for recording in data_3:
+        RMS_values_3[master_c]=np.sqrt(np.mean(recording**2))
+        master_c+=1
 
-    return RMS_values_new_1, RMS_values_new_2, RMS_values_new_3#, scaler
+    return RMS_values_1, RMS_values_2, RMS_values_3
 def FE_perf(data_1, data_2, data_3):
     RMS_values_1 = []
     for i, recording in enumerate (data_1.items()):
@@ -89,7 +71,7 @@ def FE_perf(data_1, data_2, data_3):
 
     return RMS_values_1, RMS_values_2, RMS_values_3
 def data_prep_for_ML(channel1, channel2):
-    keys = sorted(channel1.keys())
+    keys = sorted([i for i in range(0,len(channel1))])
     data1_tensors = [torch.tensor(channel1[key]) for key in keys]
     data2_tensors = [torch.tensor(channel2[key]) for key in keys]
     
@@ -108,12 +90,13 @@ train_x_no_norm, val_x_no_norm, test_x_no_norm, train_y_no_norm, val_y_no_norm, 
 train_x_norm, val_x_norm, test_x_norm= normalization (train_x_no_norm, val_x_no_norm, test_x_no_norm)
 train_y_norm, val_y_norm, test_y_norm = normalization (train_y_no_norm, val_y_no_norm, test_y_no_norm)
 train_o_norm, val_o_norm, test_o_norm = normalization (train_o_no_norm, val_o_no_norm, test_o_no_norm)
-print("#########")
+
 train_z_norm, val_z_norm, test_z_norm  = FE(train_o_norm, val_o_norm, test_o_norm )  
-print("#########")
-data_train_xy = data_prep_for_ML(train_x_norm, train_y_norm); data_val_xy = data_prep_for_ML(val_x_norm, val_y_norm); data_test_xy = data_prep_for_ML(test_x_norm, test_y_norm)
-print("#########")
-train_z_norm_l= list(train_z_norm.values()); val_z_norm_l = list(val_z_norm.values()); test_z_norm_l= list(test_z_norm.values())
+
+data_train_xy = data_prep_for_ML(train_x_norm, train_y_norm)
+data_val_xy = data_prep_for_ML(val_x_norm, val_y_norm)
+data_test_xy = data_prep_for_ML(test_x_norm, test_y_norm)
+
 
 ##### for peerfomance
 #train_x_FE_norm_l, val_x_FE_norm_l, test_x_FE_norm_l= FE_perf(train_x_norm, val_x_norm, test_x_norm )  

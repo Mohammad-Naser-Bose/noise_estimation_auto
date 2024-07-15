@@ -7,7 +7,7 @@ def loading_data(dir,label):
         cuttoff_samples = int(user_inputs.window_len_sample*1)
     else:
         num_files = user_inputs.num_music_files
-        cuttoff_samples = int(45*44100)
+        cuttoff_samples = int(15*44100)
     
     files = os.listdir(dir)[:num_files] 
 
