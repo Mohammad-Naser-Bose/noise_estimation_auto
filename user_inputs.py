@@ -30,7 +30,7 @@ music_files = os.listdir(recordings_dir)
 num_music_files = len(music_files)
 num_datapoints_nw=len(noise_gains)*len(SNRs)*num_noise_files*num_music_files
 
-if torch.cuda.is_available():
-    print("GPU is active")
-else:
-    print("GPU isn't working")
+# if torch.cuda.is_available():
+#     print("GPU is active")
+# else:
+#     print("GPU isn't working")
