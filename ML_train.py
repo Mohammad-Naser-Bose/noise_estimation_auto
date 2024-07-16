@@ -15,7 +15,7 @@ class CNN_LSTM(nn.Module):
         self.pool = nn.MaxPool1d(kernel_size=2, stride=2, padding=0)
         self.relu = nn.ReLU()
         self.flattened_size= self._get_flattened_size()
-        self.lstm = nn.LSTM(input_size=64, hidden_size=64, num_layers=3,batch_first=True)
+        self.lstm = nn.LSTM(input_size=64, hidden_size=64, num_layers=1,batch_first=True)
         self.fc1 = nn.Linear(3264,1024)
         self.fc2 = nn.Linear(1024,64) 
         self.fc3 = nn.Linear(64,1)        
@@ -51,104 +51,59 @@ class CustomDataset(Dataset):
         input_data = self.inputs[idx]
         label = self.labels[idx]
         return input_data, label
-def plotting_performance(loss_values,title):
+def plotting(train_losses, val_losses, train_label, train_pred, val_label, val_pred):
     plt.figure(figsize=(10,5))
-    plt.plot(range(1,num_epochs+1), loss_values, marker = "o", label = "Training loss")
+    plt.plot(train_losses, marker = "o", label = "Training loss")
+    plt.plot(val_losses, marker = "o", label = "Validation loss")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
-    plt.title(title)
-    #plt.show()
-    plt.savefig("Training error_per_epoch.png")
-def plotting_db(error,predictions,gt,printing_label):
-    real_ready = [element for array in gt for element in array.tolist()]
-    pred_ready = [element for array in predictions for element in array.tolist()]
-    error_ready= [element for array in error for element in array.tolist()]
-
-    real_noise_db = 20*np.log10(np.array(real_ready)/1)
-    pred_noise_db= 20*np.log10(np.array(pred_ready)/1)   
-    diff_1 = real_noise_db -pred_noise_db
-
-    fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
-    ax1.plot(real_noise_db[:100],label="Original")
-    ax1.plot(pred_noise_db[:100],label="Prediction")
-    ax1.legend()
-    ax1.set_xlabel("Datapoint")
-    ax1.set_ylabel("Noise RMS (dB)")
-    ax2.grid(True)
-    #ax1.show() 
-
-    ax2.plot(np.abs(diff_1[:100]),label="Difference between actual and predicted noise",color="black")
-    mean = np.mean(np.abs(diff_1[:100]))
-    ax2.axhline(y=mean,color="orange", linestyle="--", label="Avg")
-    ax2.legend()
-    ax2.set_xlabel("Datapoint")
-    ax2.set_ylabel("|Noise RMS (dB)|")
-    ax2.grid(True)
-    #ax1.show()
-    plt.tight_layout()
-    plt.savefig(f"{printing_label} raw performance.png")    
-
-    ##############
-    # SNR_real_db = 20*np.log10(np.array(splitting_normalization.train_y_FE_norm_l)/1)
-    # SNR_pred_db = 20*np.log10(np.array(splitting_normalization.train_y_FE_norm_l)/1)
-    # diff = SNR_real_db - SNR_pred_db
-
-    # fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,10))
-    # ax1.plot(SNR_real_db[:100],label="Original")
-    # ax1.plot(SNR_pred_db[:100],label="Prediction")
-    # ax1.legend()
-    # ax1.set_xlabel("Datapoint")
-    # ax1.set_ylabel("SNR (dB)")
-    # ax1.grid(True)
-    # #ax1.show() 
-
-    # ax2.plot(diff[:1000],label="Difference between actual and predicted noise",color="black")
-    # ax2.legend()
-    # ax2.set_xlabel("Datapoint")
-    # ax2.set_ylabel("SNR (dB)")
-    # #ax1.show()
-    # plt.tight_layout()
-    # ax2.grid(True)
-    # plt.savefig(f"{printing_label} raw performance2.png")  
-
-
+    plt.legend()
+    plt.savefig("Error_per_epoch.png")    
     
-    return(np.mean(diff_1))
-def run_ML_train(train_inputs,train_labels):#
-    dataset = CustomDataset(train_inputs,train_labels)
-    dataloader = DataLoader(dataset,batch_size=batch_size, shuffle=True)
-    reg_criterion = nn.MSELoss(reduction='mean')
-    model = my_ML_model 
-    model = model.to(device)
-    optimizer = optim.Adam(model.parameters(),lr=.001)
+    train_label_db = 20*np.log10(np.array(train_label[-1])/1)
+    train_pred_db = 20*np.log10(np.array(train_pred[-1])/1)
+    plt.figure(figsize=(10,5))
+    plt.plot(train_label_db[:100], marker = "o", label = "True values (training)")
+    plt.plot(train_pred_db[:100], marker = "o", label = "Predicted values (training)")
+    plt.xlabel("Sample")
+    plt.ylabel("Noise RMS [dB]")
+    plt.legend()
+    plt.savefig("Training1.png")  
+    
+    err_train_db = 20*np.log10((np.array(train_label[-1]) -np.array(train_pred[-1]))**2)/(np.array(train_label[-1])**2)
+    err_avg_train_db = np.mean(err_train_db)
+    plt.figure(figsize=(10,5))
+    plt.plot(err_train_db[:100], marker = "o", label = "Predicted values (training)")
+    plt.axhline(y=err_avg_train_db,color="orange", linestyle="--", label="Avg")
+    plt.xlabel("Sample")
+    plt.ylabel("Error for Noise RMS [dB]")
+    plt.legend()
+    plt.savefig("Training2.png") 
 
-    train_loss_values = []
-    for epoch in range(num_epochs):
-        model.train()
-        running_train_loss = 0
+    val_label_db = 20*np.log10(np.array(val_label[-1])/1)
+    val_pred_db = 20*np.log10(np.array(val_pred[-1])/1)
+    plt.figure(figsize=(10,5))
+    plt.plot(val_label_db[:100], marker = "o", label = "True values (validation)")
+    plt.plot(val_pred_db[:100], marker = "o", label = "Predicted values (validation)")
+    plt.xlabel("Sample")
+    plt.ylabel("Noise RMS [dB]")
+    plt.legend()
+    plt.savefig("Validation1.png")    
 
+    err_val_db = 20*np.log10((np.array(val_label[-1]) -np.array(val_pred[-1]))**2)/(np.array(val_label[-1])**2)
+    err_avg_val_db = np.mean(err_val_db)
+    plt.figure(figsize=(10,5))
+    plt.plot(err_val_db[:100], marker = "o", label = "Predicted values (validation)")
+    plt.axhline(y=err_avg_val_db,color="orange", linestyle="--", label="Avg")
+    plt.xlabel("Sample")
+    plt.ylabel("Error for Noise RMS [dB]")
+    plt.legend()
+    plt.savefig("Validation2.png")  
 
-        for batch_idx, (inputs, targets) in enumerate(dataloader):
-            inputs = inputs.to(device).to(torch.float32)
-            targets = targets.to(device).to(torch.float32)
-
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss_value  = reg_criterion(outputs, targets)
-            loss_value.backward()
-            optimizer.step()
-            running_train_loss += loss_value.item()
-
-    return model, train_loss_values
-def save_results(model, train_loss_values, error, predictions,gt):
-    with open("train_loss_values.pkl","wb") as file:
-        pickle.dump(train_loss_values,file)
-    with open("error.pkl","wb") as file:
-        pickle.dump(error,file)
-    with open("predictions.pkl","wb") as file:
-        pickle.dump(predictions,file)
-    with open("gt.pkl","wb") as file:
-        pickle.dump(gt,file)
+    return()
+def save_results(model):
+    with open("Model.pkl","wb") as file:
+        pickle.dump(model,file)
     return
 def run_ML_train_val(train_inputs,train_labels, val_inputs, val_labels):#
     dataset_train = CustomDataset(train_inputs,train_labels)
@@ -163,12 +118,19 @@ def run_ML_train_val(train_inputs,train_labels, val_inputs, val_labels):#
     patience = 5
     best_val_loss = float("inf")
     epochs_no_imrpove = 0
+    train_losses = []
+    val_losses = []
+    train_pred = []
+    train_label = []
+    val_pred = []
+    val_label = []
 
-    train_loss_values = []
     for epoch in range(num_epochs):
+        epoch_train_preds =[]
+        epoch_train_labels =[]
+
         model.train()
         running_train_loss = 0
-
 
         for batch_idx, (inputs, targets) in enumerate(dataloader_train):
             inputs = inputs.to(device).to(torch.float32)
@@ -179,11 +141,20 @@ def run_ML_train_val(train_inputs,train_labels, val_inputs, val_labels):#
             loss_value  = reg_criterion(outputs, targets)
             loss_value.backward()
             optimizer.step()
-            running_train_loss += loss_value.item()
+            running_train_loss += loss_value.item() 
+            epoch_train_preds.extend(outputs.detach().cpu().numpy().flatten())
+            epoch_train_labels.extend(targets.detach().cpu().numpy().flatten())
+
         avg_train_loss = running_train_loss / len(dataloader_train.dataset)
+        train_losses.append(avg_train_loss)
+        train_pred.append(epoch_train_preds)
+        train_label.append(epoch_train_labels)
 
         model.eval()
         running_val_loss = 0
+        epoch_val_preds =[]
+        epoch_val_labels =[]
+
         with torch.no_grad():
             for val_inputs, val_labels in dataloader_val:
                 val_inputs = val_inputs.to(device).to(torch.float32)
@@ -193,8 +164,17 @@ def run_ML_train_val(train_inputs,train_labels, val_inputs, val_labels):#
                 val_loss_value = reg_criterion(val_outputs, val_labels)
 
                 running_val_loss += val_loss_value.item() * val_inputs.size(0)
+                epoch_val_preds.extend(val_outputs.detach().cpu().numpy().flatten())
+                epoch_val_labels.extend(val_labels.detach().cpu().numpy().flatten())
 
         avg_val_loss = running_val_loss / len(dataloader_val.dataset)
+        val_losses.append(avg_val_loss)
+        val_pred.append(epoch_val_preds)
+        val_label.append(epoch_val_labels)
+
+        train_losses.append(avg_train_loss)
+        val_losses.append(avg_val_loss)
+
         print(f"Epoch{epoch+1}/{num_epochs}, Training Loss: {avg_train_loss}, Validation Loss: {avg_val_loss}")
 
         if avg_val_loss < best_val_loss:
@@ -207,10 +187,18 @@ def run_ML_train_val(train_inputs,train_labels, val_inputs, val_labels):#
         if epochs_no_improve == patience:
             print("Early stopping triggered")
             break
-    return model.load_state_dict(best_model_wts)
 
+    save_results(model.load_state_dict(best_model_wts))
+    plotting(train_losses, val_losses, train_label, train_pred, val_label, val_pred)
 
+    
+    return model
+    dataset_train = CustomDataset(train_inputs,train_labels)
+    dataloader_train = DataLoader(dataset_train,batch_size=batch_size, shuffle=True)
 
+###############
+###############
+###############
 window_len_sample_downsampled = user_inputs.window_len_sample_downsampled
 ML_type = user_inputs.ML_type
 batch_size = user_inputs.batch_size
@@ -220,5 +208,4 @@ if ML_type == "CNN_LSTM":
     my_ML_model = CNN_LSTM()             
 device ="cuda"
 
-model,train_loss_values= run_ML_train(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm)
-#best_model = run_ML_train_val(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm,splitting_normalization.data_val_xy,splitting_normalization.val_z_norm)
+best_model = run_ML_train_val(splitting_normalization.data_train_xy,splitting_normalization.train_z_norm,splitting_normalization.data_val_xy,splitting_normalization.val_z_norm)

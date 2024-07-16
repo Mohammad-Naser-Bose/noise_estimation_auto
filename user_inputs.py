@@ -4,15 +4,15 @@ recordings_dir = r"C:\Users\mn1059928\OneDrive - Bose Corporation\Desktop\audio_
 noise_dir = r"C:\Users\mn1059928\OneDrive - Bose Corporation\Desktop\noise_files"
 window_size_sec = 4  # in [s]
 sampling_freq = 44100  # in [Hz]  
-num_epochs=2
+num_epochs=100
 train_ratio = .7
 val_ratio = .15
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344
 batch_size = 1
 
-use_tf=False
+use_tf=True
 if use_tf == True:
-    tf_types = ["lowpass","bandpass"]#,"highpass"]
+    tf_types = ["lowpass","bandpass","highpass"]
 else:
     tf_types = ["None"]
 num_tfs = len(tf_types)
