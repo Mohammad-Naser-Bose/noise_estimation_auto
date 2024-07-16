@@ -4,7 +4,7 @@ recordings_dir = r"C:\Users\mn1059928\OneDrive - Bose Corporation\Desktop\audio_
 noise_dir = r"C:\Users\mn1059928\OneDrive - Bose Corporation\Desktop\noise_files"
 window_size_sec = 4  # in [s]
 sampling_freq = 44100  # in [Hz]  
-num_epochs=100
+num_epochs=2
 train_ratio = .7
 val_ratio = .15
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344
@@ -18,7 +18,7 @@ else:
 num_tfs = len(tf_types)
 
 noise_gains = [i for i in np.arange(-9, 12, 3)] # dB   
-SNRs = [2, 1.75, 1.5, 1.25, 1, .75, .5, .25]# [i for i in np.arange(3, -1, -1)] # Linear       
+SNRs = [2, 1.75, 1.5, 1.25, 1, .75, .5, .25]# Linear       
 cuttoff_noise_sample = 1*sampling_freq
 cuttoff_music_sample = 12*sampling_freq
 ML_type = "CNN_LSTM"
