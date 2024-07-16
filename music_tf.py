@@ -51,4 +51,10 @@ def transfer_fun(Data):
 
 Data_F = transfer_fun(resampling.Data_E)
 
-STOP=1
+"""
+The shape of Data F is:
+    for music TF
+        for music file
+- It's final shape should equal (the number of music files * number of TFs , music length in samples)
+
+"""

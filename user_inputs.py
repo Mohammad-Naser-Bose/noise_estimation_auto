@@ -1,6 +1,5 @@
 from imports import *
 
-start_time = time.time()
 recordings_dir = r"C:\Users\mn1059928\OneDrive - Bose Corporation\Desktop\audio_files_short"
 noise_dir = r"C:\Users\mn1059928\OneDrive - Bose Corporation\Desktop\noise_files"
 window_size_sec = 4  # in [s]
@@ -10,17 +9,19 @@ train_ratio = .7
 val_ratio = .15
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344
 batch_size = 1
-use_tf=False
-tf_types = ["lowpass"]#,"bandpass","highpass"]
-num_tfs = len(tf_types)
-normalization_flag = True
-one_noise_window_flag = True
-shortest_music_flag = True
-noise_gains = [i for i in np.arange(-9, 15, 9)] # dB   
-SNRs = [2, 1.75, 1.5, 1.25, 1, .75, .5, .25]# [i for i in np.arange(3, -1, -1)] # Linear       
 
+use_tf=False
+if use_tf == True:
+    tf_types = ["lowpass","bandpass"]#,"highpass"]
+else:
+    tf_types = ["None"]
+num_tfs = len(tf_types)
+
+noise_gains = [i for i in np.arange(-9, 12, 3)] # dB   
+SNRs = [2, 1.75, 1.5, 1.25, 1, .75, .5, .25]# [i for i in np.arange(3, -1, -1)] # Linear       
+cuttoff_noise_sample = 1*sampling_freq
+cuttoff_music_sample = 12*sampling_freq
 ML_type = "CNN_LSTM"
-norm_feature =True
 
 window_len_sample = window_size_sec * sampling_freq
 window_len_sample_downsampled = window_size_sec * downsampling_new_sr

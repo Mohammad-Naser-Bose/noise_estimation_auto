@@ -176,9 +176,8 @@ def plotting_results_test_db(error,predictions,gt,printing_label):
     return np.mean(diff_1)
 def generate_report(time, num_music, num_noise, noise_gains, SNRs, tf_types,model_type, training_loss,pm_train,pm_val,pm_test):
     with open ("Results report","w") as file:
-        file.write(f"time: {time}\n")
-        file.write(f"num_music: {num_music}\n")
-        file.write(f"num_noise: {num_noise}\n")
+        file.write(f"Num. of Music Records: {num_music}\n")
+        file.write(f"Num. of Noise Clips: {num_noise}\n")
         file.write(f"noise_gains: {noise_gains}\n")
         file.write(f"SNRs: {SNRs}\n")
         file.write(f"tf_types: {tf_types}\n")

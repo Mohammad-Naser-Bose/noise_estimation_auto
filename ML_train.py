@@ -218,17 +218,6 @@ def run_ML(train_inputs,train_labels):
     plotting_performance(train_loss_values,"Training")
     save_results(model, train_loss_values, error, predictions,gt)
     return model, train_loss_values, pm_training
-
-
-
-
-
-
-
-
-
-
-
 def save_results(model, train_loss_values, error, predictions,gt):
     with open("train_loss_values.pkl","wb") as file:
         pickle.dump(train_loss_values,file)

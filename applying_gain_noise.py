@@ -16,4 +16,10 @@ def adding_gain_noise(data,gains):
 
 Data_C = adding_gain_noise(resampling.Data_B, user_inputs.noise_gains)
 
-stop=1
+"""
+The shape of Data C is:
+    for noise gain
+        for noise file
+- It's final shape should equal (the number of noise files * number of noise gains , noise length in samples)
+
+"""

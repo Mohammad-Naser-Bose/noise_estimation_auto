@@ -4,10 +4,10 @@ import user_inputs
 def loading_data(dir,label):
     if label=="noise":
         num_files = user_inputs.num_noise_files
-        cuttoff_samples = int(user_inputs.window_len_sample*1)
+        cuttoff_samples = user_inputs.cuttoff_noise_sample
     else:
         num_files = user_inputs.num_music_files
-        cuttoff_samples = int(15*44100)
+        cuttoff_samples = user_inputs.cuttoff_music_sample
     
     files = os.listdir(dir)[:num_files] 
 

@@ -53,23 +53,6 @@ def FE(data_1, data_2, data_3):
         master_c+=1
 
     return RMS_values_1, RMS_values_2, RMS_values_3
-def FE_perf(data_1, data_2, data_3):
-    RMS_values_1 = []
-    for i, recording in enumerate (data_1.items()):
-        my_data = recording[1]
-        RMS_values_1.append(np.sqrt(np.mean((np.array(my_data)**2))))
-    
-    RMS_values_2 =  []
-    for i, recording in enumerate (data_2.items()):
-        my_data = recording[1]
-        RMS_values_2.append(np.sqrt(np.mean((np.array(my_data)**2))))
-    
-    RMS_values_3 =  []
-    for i, recording in enumerate (data_3.items()):
-        my_data = recording[1]
-        RMS_values_3.append(np.sqrt(np.mean((np.array(my_data)**2))))
-
-    return RMS_values_1, RMS_values_2, RMS_values_3
 def data_prep_for_ML(channel1, channel2):
     keys = sorted([i for i in range(0,len(channel1))])
     data1_tensors = [torch.tensor(channel1[key]) for key in keys]
@@ -97,9 +80,5 @@ data_train_xy = data_prep_for_ML(train_x_norm, train_y_norm)
 data_val_xy = data_prep_for_ML(val_x_norm, val_y_norm)
 data_test_xy = data_prep_for_ML(test_x_norm, test_y_norm)
 
-
-##### for peerfomance
-#train_x_FE_norm_l, val_x_FE_norm_l, test_x_FE_norm_l= FE_perf(train_x_norm, val_x_norm, test_x_norm )  
-#train_y_FE_norm_l, val_y_FE_norm_l, test_y_FE_norm_l= FE_perf(train_y_norm, val_y_norm, test_y_norm )  
 
 stop=1
