@@ -7,8 +7,7 @@ import user_inputs
 def windowing(signal):
     master_c = 0
     windowed_data = []
-    for i, rec in enumerate (signal.items()):
-        my_rec = rec[1]
+    for my_rec in signal:
         num_windows = len(my_rec) // user_inputs.window_len_sample_downsampled
         extra_samples = len(my_rec) % (num_windows*user_inputs.window_len_sample_downsampled)
         truncated_rec = my_rec[extra_samples:]

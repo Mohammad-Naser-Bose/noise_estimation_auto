@@ -35,8 +35,7 @@ def transfer_fun(Data):
     if user_inputs.use_tf == False:
         return Data
     else:
-        audio_transformed = {}
-        master_c = 0
+        audio_transformed = []
         for i, type in enumerate(user_inputs.tf_types):
             if type=="bandpass":
                 freq = [172, 225]
@@ -44,10 +43,9 @@ def transfer_fun(Data):
                 freq = 172
             for i in range (0, len(Data)):
                 audio_transformed_single_rec = butter_filter(Data[i], freq, 690,5,type)
-                audio_transformed[master_c] = np.squeeze(audio_transformed_single_rec)
+                audio_transformed.append(np.squeeze(audio_transformed_single_rec))
                 #plotting_tf(Data[i],audio_transformed[master_c]) 
-                master_c+=1
-        return audio_transformed
+        return np.array(audio_transformed)
 
 Data_F = transfer_fun(resampling.Data_E)
 

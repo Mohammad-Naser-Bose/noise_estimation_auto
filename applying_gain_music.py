@@ -21,7 +21,7 @@ def apply_snr(music, noise):
                 modified_music.append(factor*my_music)
                 full_noise.append(my_noise)
 
-    return modified_music, full_noise
+    return np.array(modified_music), np.array(full_noise)
 
 Data_I, Data_H = apply_snr(music_tf.Data_F, applying_gain_noise.Data_C)
 

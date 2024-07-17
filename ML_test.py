@@ -33,6 +33,7 @@ def plotting_testing(test_preds, test_labels):
     plt.ylabel("Error for Noise RMS [dB]")
     plt.legend()
     plt.savefig("Testing2.png") 
+    print("Test error is:", err_avg_test_db)
     return 
 def run_ML_testing(model, test_inputs, test_labels):
     dataset_test= CustomDataset(test_inputs,test_labels)

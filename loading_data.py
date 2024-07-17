@@ -11,16 +11,16 @@ def loading_data(dir,label):
     
     files = os.listdir(dir)[:num_files] 
 
-    full_recordings = {}
+    full_recordings = []
     for i,file in enumerate(files):
         audio_path=os.path.join(dir,file)
         audio_data, sample_rate = librosa.load(audio_path,sr=None)
 
         audio_data = audio_data[:cuttoff_samples]
 
-        full_recordings[i] = audio_data 
+        full_recordings.append(audio_data) 
     
-    return full_recordings
+    return np.array(full_recordings)
 
 
 Data_A = loading_data(user_inputs.noise_dir,"noise")
