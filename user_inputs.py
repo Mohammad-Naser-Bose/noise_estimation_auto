@@ -4,7 +4,7 @@ recordings_dir = r"C:\Users\mn1059928\OneDrive - Bose Corporation\Desktop\audio_
 noise_dir = r"C:\Users\mn1059928\OneDrive - Bose Corporation\Desktop\noise_files"
 window_size_sec = 4  # in [s]
 sampling_freq = 44100  # in [Hz]  
-num_epochs=50
+num_epochs=25
 train_ratio = .7
 val_ratio = .15
 downsampling_new_sr = 690 #Ratio=64,128 = 690,344

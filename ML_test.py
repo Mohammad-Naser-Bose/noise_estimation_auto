@@ -13,27 +13,34 @@ class CustomDataset(Dataset):
         input_data = self.inputs[idx]
         label = self.labels[idx]
         return input_data, label
-def plotting_testing(test_preds, test_labels):
-    test_label_db = 20*np.log10(np.array(test_labels)/1)
-    test_pred_db = 20*np.log10(np.array(test_preds)/1)
+def plotting_testing(test_pred, test_label):
+    scaler=MinMaxScaler(feature_range=(1e-5,1))
+    labels_norms=scaler.fit_transform(np.array(test_label).reshape(-1, 1))
+    scaler=MinMaxScaler(feature_range=(1e-5,1))
+    preds_norms=scaler.fit_transform(np.array(test_pred).reshape(-1, 1))
+
+    test_label_db = 20*np.log10(labels_norms)
+    test_pred_db = 20*np.log10(preds_norms)
     plt.figure(figsize=(10,5))
-    plt.plot(test_label_db[:100], marker = "o", label = "True values (Testing)")
-    plt.plot(test_pred_db[:100], marker = "o", label = "Predicted values (Testing)")
+    plt.plot(test_label_db[:100], marker = "o", label = "True testues (Testing)")
+    plt.plot(test_pred_db[:100], marker = "o", label = "Predicted testues (Testing)")
     plt.xlabel("Sample")
     plt.ylabel("Noise RMS [dB]")
     plt.legend()
     plt.savefig("Testing1.png")  
     
-    err_test_db = 20*np.log10((np.array(test_labels) -np.array(test_preds))**2)/(np.array(test_labels)**2)
-    err_avg_test_db = np.mean(err_test_db)
+    err_test = (np.array(test_label)-np.array(test_pred))/(np.array(test_label))
+    scaler=MinMaxScaler(feature_range=(1e-5,1))
+    err_test_norm=scaler.fit_transform(np.array(err_test).reshape(-1, 1))
+    err_test_db = 20*np.log10(err_test_norm)
     plt.figure(figsize=(10,5))
-    plt.plot(err_test_db[:100], marker = "o", label = "Predicted values (validation)")
-    plt.axhline(y=err_avg_test_db,color="orange", linestyle="--", label="Avg")
+    plt.plot(err_test_db[:100], marker = "o", label = "Predicted testues (Testing)")
+    plt.axhline(y=np.mean(err_test_db[:100]),color="orange", linestyle="--", label="Avg")
     plt.xlabel("Sample")
     plt.ylabel("Error for Noise RMS [dB]")
     plt.legend()
     plt.savefig("Testing2.png") 
-    print("Test error is:", err_avg_test_db)
+
     return 
 def run_ML_testing(model, test_inputs, test_labels):
     dataset_test= CustomDataset(test_inputs,test_labels)

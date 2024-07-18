@@ -60,8 +60,13 @@ def plotting(train_losses, val_losses, train_label, train_pred, val_label, val_p
     plt.legend()
     plt.savefig("Error_per_epoch.png")    
     
-    train_label_db = 20*np.log10(np.array(train_label[-1])/1)
-    train_pred_db = 20*np.log10(np.array(train_pred[-1])/1)
+    scaler=MinMaxScaler(feature_range=(1e-5,1))
+    labels_norms=scaler.fit_transform(np.array(train_label[-1]).reshape(-1, 1))
+    scaler=MinMaxScaler(feature_range=(1e-5,1))
+    preds_norms=scaler.fit_transform(np.array(train_pred[-1]).reshape(-1, 1))
+
+    train_label_db = 20*np.log10(labels_norms)
+    train_pred_db = 20*np.log10(preds_norms)
     plt.figure(figsize=(10,5))
     plt.plot(train_label_db[:100], marker = "o", label = "True values (training)")
     plt.plot(train_pred_db[:100], marker = "o", label = "Predicted values (training)")
@@ -70,35 +75,45 @@ def plotting(train_losses, val_losses, train_label, train_pred, val_label, val_p
     plt.legend()
     plt.savefig("Training1.png")  
     
-    err_train_db = 20*np.log10((np.array(train_label[-1]) -np.array(train_pred[-1]))**2)/(np.array(train_label[-1])**2)
-    err_avg_train_db = np.mean(err_train_db)
+    err_train = (np.array(train_label[-1])-np.array(train_pred[-1]))/(np.array(train_label[-1]))
+    scaler=MinMaxScaler(feature_range=(1e-5,1))
+    err_train_norm=scaler.fit_transform(np.array(err_train).reshape(-1, 1))
+    err_train_db = 20*np.log10(err_train_norm)
     plt.figure(figsize=(10,5))
     plt.plot(err_train_db[:100], marker = "o", label = "Predicted values (training)")
-    plt.axhline(y=err_avg_train_db,color="orange", linestyle="--", label="Avg")
+    plt.axhline(y=np.mean(err_train_db[:100]),color="orange", linestyle="--", label="Avg")
     plt.xlabel("Sample")
     plt.ylabel("Error for Noise RMS [dB]")
     plt.legend()
     plt.savefig("Training2.png") 
 
-    val_label_db = 20*np.log10(np.array(val_label[-1])/1)
-    val_pred_db = 20*np.log10(np.array(val_pred[-1])/1)
+    scaler=MinMaxScaler(feature_range=(1e-5,1))
+    labels_norms=scaler.fit_transform(np.array(val_label[-1]).reshape(-1, 1))
+    scaler=MinMaxScaler(feature_range=(1e-5,1))
+    preds_norms=scaler.fit_transform(np.array(val_pred[-1]).reshape(-1, 1))
+
+    val_label_db = 20*np.log10(labels_norms)
+    val_pred_db = 20*np.log10(preds_norms)
     plt.figure(figsize=(10,5))
-    plt.plot(val_label_db[:100], marker = "o", label = "True values (validation)")
-    plt.plot(val_pred_db[:100], marker = "o", label = "Predicted values (validation)")
+    plt.plot(val_label_db[:100], marker = "o", label = "True values (Validation)")
+    plt.plot(val_pred_db[:100], marker = "o", label = "Predicted values (Validation)")
     plt.xlabel("Sample")
     plt.ylabel("Noise RMS [dB]")
     plt.legend()
-    plt.savefig("Validation1.png")    
-
-    err_val_db = 20*np.log10((np.array(val_label[-1]) -np.array(val_pred[-1]))**2)/(np.array(val_label[-1])**2)
-    err_avg_val_db = np.mean(err_val_db)
+    plt.savefig("Validation1.png")  
+    
+    err_val = (np.array(val_label[-1])-np.array(val_pred[-1]))/(np.array(val_label[-1]))
+    scaler=MinMaxScaler(feature_range=(1e-5,1))
+    err_val_norm=scaler.fit_transform(np.array(err_val).reshape(-1, 1))
+    err_val_db = 20*np.log10(err_val_norm)
     plt.figure(figsize=(10,5))
-    plt.plot(err_val_db[:100], marker = "o", label = "Predicted values (validation)")
-    plt.axhline(y=err_avg_val_db,color="orange", linestyle="--", label="Avg")
+    plt.plot(err_val_db[:100], marker = "o", label = "Predicted values (Validation)")
+    plt.axhline(y=np.mean(err_val_db[:100]),color="orange", linestyle="--", label="Avg")
     plt.xlabel("Sample")
     plt.ylabel("Error for Noise RMS [dB]")
     plt.legend()
-    plt.savefig("Validation2.png")  
+    plt.savefig("Validation2.png") 
+
 
     return()
 def save_results(model):
@@ -115,7 +130,7 @@ def run_ML_train_val(train_inputs,train_labels, val_inputs, val_labels):#
     model = my_ML_model 
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(),lr=0.001, weight_decay=0.000001)
-    patience = 5
+    patience = 10
     best_val_loss = float("inf")
     epochs_no_imrpove = 0
     train_losses = []
